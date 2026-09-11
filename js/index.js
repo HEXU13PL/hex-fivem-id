@@ -1,7 +1,7 @@
 // ----------------------------------------------------
 // KONFIGURACJA DISCORD WEBHOOK
 // ----------------------------------------------------
-const DISCORD_WEBHOOK_URL = 'TUTAJ_WKLLEJ_SWOJ_WEBHOOK'; // Podmień na swój webhook z Discorda
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN'; // Podmień na swój webhook z Discorda
 
 let currentPlayers = [];
 let favorites = JSON.parse(localStorage.getItem('hex_favorites')) || [];
