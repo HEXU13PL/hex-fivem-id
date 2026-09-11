@@ -1,5 +1,5 @@
 // endpoints
-export const API_BASE_URL = 'https://frontend.cfx-services.net/api/servers/single';
+export const API_BASE_URL = 'https://frontend.cfx-services.net/api';
 export const SERVERS_ICON_URL = 'https://servers-live.fivem.net/servers/icon';
 
 // links templates
