@@ -7,7 +7,6 @@ import { initStatistics } from './statistics.js';
 import { showNotification } from './notifications.js';
 import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
-import { startWebhookNotifier } from './webhook.js';
 
 // FiveCity vp4rxq
 // Pixa vqkdxx
