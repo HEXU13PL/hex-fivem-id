@@ -8,32 +8,26 @@ const INTERVAL_TIME = 5 * 60 * 1000;
 
 let webhookInterval = null;
 
-export const startWebhookNotifier = () => {
-    if (webhookInterval) return;
-
-    console.info('Webhook notifier started (every 5 minutes)');
-    
-    // Pierwsze wysłanie po 10 sekundach (daje czas na załadowanie danych z serwera)
-    setTimeout(() => {
-        sendPlayersToDiscord();
-    }, 10000);
-
-    // Cykliczne wysyłanie co 5 minut
-    webhookInterval = setInterval(() => {
-        sendPlayersToDiscord();
-    }, INTERVAL_TIME);
+const showNotification = (message, type) => {
+    if (window.createNotification) {
+        window.createNotification({
+            message,
+            type,
+            duration: 3000,
+        });
+    }
 };
 
-async function sendPlayersToDiscord() {
+export async function sendPlayersToDiscordManual() {
     if (!WEBHOOK_URL || WEBHOOK_URL.includes('TUTAJ_WKLEJ')) {
-        console.warn('Webhook URL nie jest skonfigurowany.');
+        showNotification('Ustaw URL webhooka w js/webhook.js!', 'error');
         return;
     }
 
     const players = getPlayers();
 
     if (!players || players.length === 0) {
-        console.info('Brak graczy do wysłania na webhook.');
+        showNotification('Brak danych o graczach do wysłania', 'error');
         return;
     }
 
@@ -48,7 +42,7 @@ async function sendPlayersToDiscord() {
         description: playerListString || 'Brak graczy online',
         timestamp: new Date().toISOString(),
         footer: {
-            text: 'HEX FiveM id • Auto-updater',
+            text: 'HEX FiveM id • Manual Export',
         },
     };
 
@@ -64,14 +58,33 @@ async function sendPlayersToDiscord() {
         });
 
         if (response.ok) {
-            console.info('Wysłano listę graczy na webhook Discorda.');
+            showNotification('Wysłano listę graczy na Discorda!', 'success');
         } else {
-            console.error(`Błąd wysyłania webhooka: Status ${response.status}`);
+            showNotification(`Błąd wysyłania: Status ${response.status}`, 'error');
         }
     } catch (error) {
         console.error('Błąd podczas wysyłania webhooka:', error);
+        showNotification('Błąd połączenia z Discordem', 'error');
     }
 }
 
-// Uruchomienie automatyczne przy załadowaniu modułu
+export const startWebhookNotifier = () => {
+    if (webhookInterval) return;
+
+    console.info('Webhook notifier started (every 5 minutes)');
+
+    webhookInterval = setInterval(() => {
+        sendPlayersToDiscordManual();
+    }, INTERVAL_TIME);
+};
+
+// Obsługa przycisku w HTML (jeśli przycisk ma id="send-webhook-button")
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.querySelector('#send-webhook-button');
+    if (btn) {
+        btn.addEventListener('click', sendPlayersToDiscordManual);
+    }
+});
+
+// Automatyczny interval w tle
 startWebhookNotifier();
