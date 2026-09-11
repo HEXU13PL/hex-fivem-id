@@ -32,7 +32,10 @@ export const STORAGE_KEYS = {
 export const DEFAULT_REFRESH_TIME = 30;
 
 export const PROXIES = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?url=',
-  'https://proxy.cors.sh/'
+	'',
+	'https://corsproxy.io/',
+	'https://cors-proxy.htmldriven.com/?url=',
+	'https://thingproxy.freeboard.io/fetch/',
+	'https://api.allorigins.win/raw?url=',
+	'https://test.cors.workers.dev/?',
 ];
