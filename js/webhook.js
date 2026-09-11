@@ -9,12 +9,14 @@ const INTERVAL_TIME = 5 * 60 * 1000;
 let webhookInterval = null;
 
 export const startWebhookNotifier = () => {
-    if (webhookInterval) return; // Zapobiega wielokrotnemu uruchomieniu
+    if (webhookInterval) return;
 
     console.info('Webhook notifier started (every 5 minutes)');
     
-    // Pierwsza wysyłka natychmiast po załadowaniu
-    sendPlayersToDiscord();
+    // Pierwsze wysłanie po 10 sekundach (daje czas na załadowanie danych z serwera)
+    setTimeout(() => {
+        sendPlayersToDiscord();
+    }, 10000);
 
     // Cykliczne wysyłanie co 5 minut
     webhookInterval = setInterval(() => {
@@ -22,17 +24,9 @@ export const startWebhookNotifier = () => {
     }, INTERVAL_TIME);
 };
 
-export const stopWebhookNotifier = () => {
-    if (webhookInterval) {
-        clearInterval(webhookInterval);
-        webhookInterval = null;
-        console.info('Webhook notifier stopped');
-    }
-};
-
 async function sendPlayersToDiscord() {
     if (!WEBHOOK_URL || WEBHOOK_URL.includes('TUTAJ_WKLEJ')) {
-        console.warn('Webhook URL nie został skonfigurowany w js/webhook.js');
+        console.warn('Webhook URL nie jest skonfigurowany.');
         return;
     }
 
@@ -43,15 +37,14 @@ async function sendPlayersToDiscord() {
         return;
     }
 
-    // Formatowanie listy graczy (ID | Name | Ping)
     const playerListString = players
-        .slice(0, 50) // Discord ma limit 4096 znaków na embed, ograniczamy widok do pierwszych 50 dla bezpieczeństwa
+        .slice(0, 50)
         .map((p) => `\`[ID: ${p.id}]\` **${p.name}** (${p.ping}ms)`)
         .join('\n');
 
     const embed = {
         title: `📊 Aktualna lista graczy (${players.length})`,
-        color: 0x5865f2, // Kolor fioletowy Discorda
+        color: 0x5865f2,
         description: playerListString || 'Brak graczy online',
         timestamp: new Date().toISOString(),
         footer: {
@@ -71,7 +64,7 @@ async function sendPlayersToDiscord() {
         });
 
         if (response.ok) {
-            console.info('Pomyślnie wysłano listę graczy na Discord webhook!');
+            console.info('Wysłano listę graczy na webhook Discorda.');
         } else {
             console.error(`Błąd wysyłania webhooka: Status ${response.status}`);
         }
@@ -79,3 +72,6 @@ async function sendPlayersToDiscord() {
         console.error('Błąd podczas wysyłania webhooka:', error);
     }
 }
+
+// Uruchomienie automatyczne przy załadowaniu modułu
+startWebhookNotifier();
