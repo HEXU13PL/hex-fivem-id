@@ -1,7 +1,7 @@
 // ----------------------------------------------------
 // KONFIGURACJA DISCORD WEBHOOK
 // ----------------------------------------------------
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN'; // Podmień na swój webhook z Discorda
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN'; // Podmień na swój link Webhook z Discorda
 
 let currentPlayers = [];
 let favorites = JSON.parse(localStorage.getItem('hex_favorites')) || [];
@@ -25,14 +25,14 @@ const statId = document.getElementById('stat-id');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabContents = document.querySelectorAll('.tab-content');
 
-// Funkcja wysyłająca logi na Discord Webhook
+// Wysyłanie logów na Discord Webhook
 async function sendDiscordLog(actionType, serverId, onlineCount = 0, maxCount = 0, serverName = '') {
-    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('TUTAJ_WKLLEJ_SWOJ_WEBHOOK')) return;
+    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('TUTAJ_WKLEJ_SWOJ_WEBHOOK')) return;
 
     const isRefresh = actionType === 'refresh';
     const embed = {
         title: isRefresh ? '🔄 Odświeżono Serwer' : '🔍 Wyszukano Serwer',
-        color: isRefresh ? 3447003 : 15009812, // Niebieski dla refresh, Czerwony dla search/connect
+        color: isRefresh ? 3447003 : 15009812,
         fields: [
             { name: 'Nazwa Serwera', value: serverName || 'Nieznana', inline: false },
             { name: 'Server ID', value: `\`${serverId.toUpperCase()}\``, inline: true },
@@ -58,6 +58,7 @@ async function fetchServerData(serverId, actionType = 'connect') {
     showLoader(true);
     
     try {
+        // Użycie CORS proxy do działania na GitHub Pages
         const targetUrl = `https://servers-frontend.fivem.net/api/servers/single/${serverId}`;
         const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
         
@@ -68,25 +69,22 @@ async function fetchServerData(serverId, actionType = 'connect') {
 
         currentPlayers = data.players || [];
         
-        // Nazwa serwera
         let cleanName = serverId;
         if (serverNameEl && data.hostname) {
             cleanName = data.hostname.replace(/\^[0-9]/g, '');
             serverNameEl.textContent = cleanName.length > 30 ? cleanName.substring(0, 30) + '...' : cleanName;
         }
 
-        // Pobieranie dokładnych danych graczy
         const onlineCount = data.clients ?? currentPlayers.length;
         const maxCount = data.sv_maxclients ?? data.svMaxclients ?? '?';
 
-        // Aktualizacja Kafelków KPI
         if (statStatus) statStatus.textContent = 'Online';
         if (statId) statId.textContent = serverId.toUpperCase();
         if (statPlayers) {
             statPlayers.textContent = `${onlineCount} / ${maxCount}`;
         }
 
-        // Wysyłanie logu do Discorda
+        // Wysyłanie logu
         sendDiscordLog(actionType, serverId, onlineCount, maxCount, cleanName);
 
         saveToHistory(serverId, cleanName);
@@ -177,7 +175,6 @@ function saveToHistory(id, name) {
     localStorage.setItem('hex_history', JSON.stringify(history));
 }
 
-// Obsługa zdarzeń
 if (connectBtn) {
     connectBtn.addEventListener('click', () => {
         const id = serverInput.value.trim();
@@ -204,7 +201,6 @@ if (searchInput) {
     });
 }
 
-// Przełączanie zakładek
 tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         tabButtons.forEach(b => b.classList.remove('active'));
