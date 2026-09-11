@@ -1,373 +1,217 @@
-import { getPlayerKey, isPlayerFavorite, updateActivePlayers } from './favorites.js';
-import { checkPendingSearch, isSearching, searchPlayers } from './search.js';
-import { setServerInfo, setTitle } from './server.js';
-import { API_BASE_URL, DEFAULT_HEADERS, PROXIES } from './utils/constants.js';
-import { getDiscordId, getSteamId } from './utils/user.js';
+// ----------------------------------------------------
+// KONFIGURACJA DISCORD WEBHOOK
+// ----------------------------------------------------
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN'; // Podmień na swój webhook z Discorda
 
-const refreshButton = document.querySelector('#refresh-button');
-const loader = document.querySelector('#loader');
-const table = document.querySelector('table');
+let currentPlayers = [];
+let favorites = JSON.parse(localStorage.getItem('hex_favorites')) || [];
+let history = JSON.parse(localStorage.getItem('hex_history')) || [];
 
-let currentPlayers;
+// Elementy DOM
+const serverInput = document.getElementById('server-id');
+const connectBtn = document.getElementById('server-id-button');
+const refreshBtn = document.getElementById('refresh-button');
+const searchInput = document.getElementById('search');
+const loader = document.getElementById('loader');
+const playersTable = document.getElementById('players-table');
+const serverNameEl = document.getElementById('server-name');
 
-export const getPlayers = () => currentPlayers;
+// Kafelki Statystyk KPI
+const statStatus = document.getElementById('stat-status');
+const statPlayers = document.getElementById('stat-players');
+const statId = document.getElementById('stat-id');
 
-async function retryFetch(url, options = {}) {
-    const { retriesPerProxy = 1, timeout = 5000, backoff = 2 } = options;
-    const proxyList = options.proxyList ? [...options.proxyList, ...PROXIES] : PROXIES;
+// Zakładki
+const tabButtons = document.querySelectorAll('.tab-button');
+const tabContents = document.querySelectorAll('.tab-content');
 
-    const targets = proxyList.length ? proxyList : [null];
+// Funkcja wysyłająca logi na Discord Webhook
+async function sendDiscordLog(actionType, serverId, onlineCount = 0, maxCount = 0, serverName = '') {
+    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('TUTAJ_WKLLEJ_SWOJ_WEBHOOK')) return;
 
-    for (let i = 0; i < targets.length; i++) {
-        const proxy = targets[i];
+    const isRefresh = actionType === 'refresh';
+    const embed = {
+        title: isRefresh ? '🔄 Odświeżono Serwer' : '🔍 Wyszukano Serwer',
+        color: isRefresh ? 3447003 : 15009812, // Niebieski dla refresh, Czerwony dla search/connect
+        fields: [
+            { name: 'Nazwa Serwera', value: serverName || 'Nieznana', inline: false },
+            { name: 'Server ID', value: `\`${serverId.toUpperCase()}\``, inline: true },
+            { name: 'Gracze Online', value: `\`${onlineCount} / ${maxCount}\``, inline: true }
+        ],
+        footer: { text: 'HEX FiveM ID • System Logów' },
+        timestamp: new Date().toISOString()
+    };
 
-        for (let attempt = 0; attempt <= retriesPerProxy; attempt++) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), timeout);
-
-            const finalUrl = proxy ? proxy + url : url;
-
-            try {
-                const response = await fetch(finalUrl, {
-                    ...options,
-                    signal: controller.signal,
-                });
-
-                clearTimeout(timer);
-
-                if (response.ok) {
-                    return response;
-                }
-
-                if (response.status === 404) {
-                    const error = new Error(`Server not found (404)`);
-                    error.nonRetryable = true;
-                    throw error;
-                }
-
-                throw new Error(`Retryable status: ${response.status}`);
-            } catch (err) {
-                clearTimeout(timer);
-
-                if (err.nonRetryable) {
-                    throw err;
-                }
-
-                const isLastAttemptForProxy = attempt === retriesPerProxy;
-                const isLastProxy = i === targets.length - 1;
-                const isLastOverall = isLastProxy && isLastAttemptForProxy;
-
-                if (isLastOverall) {
-                    throw err;
-                }
-
-                if (!isLastAttemptForProxy) {
-                    const delay = timeout * Math.pow(backoff, attempt);
-                    console.warn(`Proxy ${proxy || 'direct'} failed (attempt ${attempt + 1}). Retrying in ${delay}ms...`);
-                    await new Promise((res) => setTimeout(res, delay));
-                } else {
-                    console.warn(`Proxy ${proxy || 'direct'} exhausted. Switching to next proxy...`);
-                }
-            }
-        }
+    try {
+        await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [embed] })
+        });
+    } catch (err) {
+        console.error('Błąd podczas wysyłania logów na Discord:', err);
     }
 }
 
-export const fetchServer = (serverId) => {
+async function fetchServerData(serverId, actionType = 'connect') {
+    if (!serverId) return;
+    showLoader(true);
+    
     try {
-        if (!isValidServerId(serverId)) {
-            showNotification('Invalid server ID format', 'error');
-            return;
+        const targetUrl = `https://servers-frontend.fivem.net/api/servers/single/${serverId}`;
+        const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+        
+        if (!response.ok) throw new Error('Nie znaleziono serwera lub serwer jest offline.');
+        
+        const json = await response.json();
+        const data = json.Data;
+
+        currentPlayers = data.players || [];
+        
+        // Nazwa serwera
+        let cleanName = serverId;
+        if (serverNameEl && data.hostname) {
+            cleanName = data.hostname.replace(/\^[0-9]/g, '');
+            serverNameEl.textContent = cleanName.length > 30 ? cleanName.substring(0, 30) + '...' : cleanName;
         }
 
-        setTitle('Loading server data from FiveM API...');
-        showLoader(true);
+        // Pobieranie dokładnych danych graczy
+        const onlineCount = data.clients ?? currentPlayers.length;
+        const maxCount = data.sv_maxclients ?? data.svMaxclients ?? '?';
 
-        if (refreshButton) {
-            refreshButton.onclick = () => fetchServer(serverId);
+        // Aktualizacja Kafelków KPI
+        if (statStatus) statStatus.textContent = 'Online';
+        if (statId) statId.textContent = serverId.toUpperCase();
+        if (statPlayers) {
+            statPlayers.textContent = `${onlineCount} / ${maxCount}`;
         }
 
-        const url = `${API_BASE_URL}/servers/single/${serverId}`;
-        console.info(`Fetching server info`, serverId, url);
+        // Wysyłanie logu do Discorda
+        sendDiscordLog(actionType, serverId, onlineCount, maxCount, cleanName);
 
-        retryFetch(url, { headers: DEFAULT_HEADERS })
-            .then(handleResponse)
-            .then((json) => {
-                setServerInfo(serverId, json.Data);
-                fetchPlayers(url, false);
-                showNotification('Server data loaded successfully', 'success');
-            })
-            .catch((error) => {
-                console.error(error);
-                setTitle('Error loading server data');
-                if (error.message && (error.message.includes('404') || error.message.toLowerCase().includes('not found'))) {
-                    showNotification('Server not found. Please enter a valid server ID.', 'error');
-                } else {
-                    showNotification('Failed to load server data', 'error');
-                }
-                showLoader(false);
-            });
+        saveToHistory(serverId, cleanName);
+        renderPlayersTable(currentPlayers);
+        showNotification(`Pomyślnie załadowano serwer ${serverId.toUpperCase()}`);
+
     } catch (error) {
-        console.error('Error in fetchServer:', error);
-        showNotification('An unexpected error occurred', 'error');
+        showNotification(error.message, true);
+        if (statStatus) statStatus.textContent = 'Offline';
+        if (statPlayers) statPlayers.textContent = '0 / 0';
+        if (statId) statId.textContent = 'ERR';
+    } finally {
         showLoader(false);
     }
-};
+}
 
-const fetchPlayers = (url, playersFetch = false) => {
-    console.info('Fetching players with method:', playersFetch ? 'players.json' : 'normal', url);
-    retryFetch(url, { headers: DEFAULT_HEADERS })
-        .then(handleResponse)
-        .then((json) => {
-            let players = playersFetch ? json : json.Data.players;
-            players = formatPlayers(players);
+function renderPlayersTable(players) {
+    const rows = playersTable.querySelectorAll('tr:not(#table-header)');
+    rows.forEach(row => row.remove());
 
-            if (!arraysEqual(currentPlayers, players)) {
-                currentPlayers = players;
-                renderPlayers(players);
-                updateActivePlayers(players);
-                checkPendingSearch();
-            }
-
-            showLoader(false);
-        })
-        .catch((error) => {
-            console.error(error);
-            showNotification('Failed to load player data', 'error');
-            showLoader(false);
-        });
-};
-
-const handleResponse = (response) => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    return response.json();
-};
-
-const formatPlayers = (players) => {
-    if (!Array.isArray(players)) return [];
-    const formattedPlayers = [];
-    players.forEach((player) => {
-        const socials = {};
-
-        if (player.identifiers) {
-            const steamIdentifier = getSteamId(player.identifiers);
-            if (steamIdentifier) socials.steam = steamIdentifier;
-
-            const discordIdentifier = getDiscordId(player.identifiers);
-            if (discordIdentifier) socials.discord = discordIdentifier;
-        }
-
-        formattedPlayers.push({
-            name: player.name,
-            id: player.id,
-            socials,
-            ping: player.ping,
-        });
-    });
-    return formattedPlayers.sort((a, b) => a.id - b.id);
-};
-
-const resetTable = () => {
-    if (!table) return;
-    [...table.querySelectorAll('tr')].filter((tr) => tr.id !== 'table-header').forEach((tr) => tr.remove());
-};
-
-const STEAM_LINK = 'https://steamcommunity.com/profiles/%id%';
-const DISCORD_LINK = 'https://discord.com/users/%id%';
-
-export const renderPlayers = (players, search = false) => {
-    if (!table) return;
-    resetTable();
-
-    console.info('Rendering new players', players.length);
-    let index = 1;
-    players.forEach((player) => {
+    if (!players || players.length === 0) {
         const tr = document.createElement('tr');
-        const playerKey = getPlayerKey(player);
-        tr.setAttribute('data-player-key', playerKey);
+        tr.className = 'table-footer';
+        tr.innerHTML = `<td colspan="6">Brak graczy na serwerze lub brak danych.</td>`;
+        playersTable.appendChild(tr);
+        return;
+    }
 
-        const no = document.createElement('td');
-        const star = document.createElement('td');
-        const id = document.createElement('td');
-        const name = document.createElement('td');
-        const socials = document.createElement('td');
-        const ping = document.createElement('td');
+    players.forEach((player, index) => {
+        const tr = document.createElement('tr');
 
-        no.className = 'table-no';
-        star.className = 'table-favorite';
-        id.className = 'table-id';
-        name.className = 'table-name';
-        socials.className = 'table-socials';
-        ping.className = 'table-ping';
+        const discordId = player.identifiers?.find(id => id.startsWith('discord:'))?.replace('discord:', '') || null;
+        const steamHex = player.identifiers?.find(id => id.startsWith('steam:'))?.replace('steam:', '') || null;
+        const license = player.identifiers?.find(id => id.startsWith('license:'))?.replace('license:', '') || null;
 
-        no.textContent = index++ + '.';
-        const isFavorite = isPlayerFavorite(playerKey);
-
-        const starImg = document.createElement('img');
-        starImg.src = isFavorite ? 'img/star.svg' : 'img/empty-star.svg';
-        starImg.alt = isFavorite ? 'Remove from Favorites' : 'Add to Favorites';
-        starImg.title = isFavorite ? 'Remove from Favorites' : 'Add to Favorites';
-        star.appendChild(starImg);
-
-        id.textContent = player.id;
-        name.textContent = player.name;
-
-        // Badge Discorda z kopiowaniem formatu <@id>
-        if (player.socials && player.socials.discord) {
-            const discordId = player.socials.discord;
-            const mentionFormat = `<@${discordId}>`;
-
-            const discordContainer = document.createElement('span');
-            discordContainer.className = 'discord-user-badge';
-            discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
-            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s;';
-
-            discordContainer.innerHTML = `
-                <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Discord" style="width: 14px; height: 14px; border-radius: 50%;">
-                <span>${discordId}</span>
-            `;
-
-            discordContainer.onmouseover = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.3)'; };
-            discordContainer.onmouseout = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.15)'; };
-
-            discordContainer.onclick = (e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(mentionFormat)
-                    .then(() => {
-                        showNotification(`Skopiowano: ${mentionFormat}`, 'success');
-                    })
-                    .catch(() => {
-                        showNotification('Nie udało się skopiować danych', 'error');
-                    });
-            };
-
-            name.appendChild(discordContainer);
-
-            fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success && data.data && data.data.discord_user) {
-                        const user = data.data.discord_user;
-                        const avatarUrl = user.avatar 
-                            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=32`
-                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-                        discordContainer.innerHTML = `
-                            <img src="${avatarUrl}" alt="Avatar" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover;">
-                            <span>@${user.username}</span>
-                        `;
-                    }
-                })
-                .catch(() => {});
+        let identifiersHtml = '<div class="table-socials">';
+        if (discordId) {
+            identifiersHtml += `<a href="https://discord.com/users/${discordId}" target="_blank" class="id-badge discord">Discord: ${discordId}</a>`;
         }
-
-        ping.textContent = `${player.ping}ms`;
-
-        if (player.socials.steam) {
-            const link = document.createElement('a');
-            link.href = STEAM_LINK.replace('%id%', player.socials.steam);
-            link.target = '_blank';
-            const steamImg = document.createElement('img');
-            steamImg.src = 'img/steam.svg';
-            steamImg.alt = 'Steam';
-            link.appendChild(steamImg);
-            socials.appendChild(link);
+        if (steamHex) {
+            identifiersHtml += `<span class="id-badge steam">Steam: ${steamHex}</span>`;
         }
-        if (player.socials.discord) {
-            const link = document.createElement('a');
-            link.href = DISCORD_LINK.replace('%id%', player.socials.discord);
-            link.target = '_blank';
-            const discordImg = document.createElement('img');
-            discordImg.src = 'img/discord.svg';
-            discordImg.alt = 'Discord';
-            link.appendChild(discordImg);
-            socials.appendChild(link);
+        if (license) {
+            identifiersHtml += `<span class="id-badge license">Lic: ${license.substring(0, 8)}...</span>`;
         }
+        identifiersHtml += '</div>';
 
-        tr.appendChild(no);
-        tr.appendChild(star);
-        tr.appendChild(id);
-        tr.appendChild(name);
-        tr.appendChild(socials);
-        tr.appendChild(ping);
+        const isFav = favorites.some(f => f.id === player.id || f.name === player.name);
 
-        table.appendChild(tr);
+        tr.innerHTML = `
+            <td class="table-no">${index + 1}</td>
+            <td class="table-favorite" data-id="${player.id}">
+                <img src="img/star.svg" style="${isFav ? 'filter: invert(21%) sepia(91%) saturate(5838%) hue-rotate(352deg) brightness(96%) contrast(105%);' : 'opacity:0.3;'}" alt="Fav">
+            </td>
+            <td class="table-id">${player.id}</td>
+            <td class="table-name">${escapeHtml(player.name)}</td>
+            <td>${identifiersHtml}</td>
+            <td class="table-ping">${player.ping}ms</td>
+        `;
+
+        playersTable.appendChild(tr);
     });
+}
 
-    const footerTr = document.createElement('tr');
-    footerTr.className = 'table-footer';
+function showLoader(show) {
+    if (loader) loader.style.display = show ? 'flex' : 'none';
+}
 
-    const footerTd = document.createElement('td');
-    footerTd.colSpan = 6;
+function showNotification(msg, isError = false) {
+    const container = document.getElementById('notification-container');
+    if (!container) return;
+    const note = document.createElement('div');
+    note.className = 'notification';
+    if (isError) note.style.borderLeftColor = 'var(--offline-color)';
+    note.innerHTML = `<span>${msg}</span>`;
+    container.appendChild(note);
+    setTimeout(() => note.remove(), 3000);
+}
 
-    const span1 = document.createElement('span');
-    span1.textContent = 'This page is not affiliated with FiveM or any other server.';
-    footerTd.appendChild(span1);
-    footerTd.appendChild(document.createElement('br'));
+function escapeHtml(str) {
+    return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+}
 
-    const span2 = document.createElement('span');
-    span2.appendChild(document.createTextNode('Created by '));
+function saveToHistory(id, name) {
+    history = history.filter(h => h.id !== id);
+    history.unshift({ id, name, time: new Date().toLocaleTimeString() });
+    if (history.length > 5) history.pop();
+    localStorage.setItem('hex_history', JSON.stringify(history));
+}
 
-    const link = document.createElement('a');
-    link.href = 'https://github.com/HEXU13PL';
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = 'HEX';
+// Obsługa zdarzeń
+if (connectBtn) {
+    connectBtn.addEventListener('click', () => {
+        const id = serverInput.value.trim();
+        if (id) fetchServerData(id, 'connect');
+    });
+}
 
-    span2.appendChild(link);
-    span2.appendChild(document.createTextNode('.'));
+if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+        const id = serverInput.value.trim();
+        if (id) fetchServerData(id, 'refresh');
+    });
+}
 
-    footerTd.appendChild(span2);
-    footerTr.appendChild(footerTd);
-    table.appendChild(footerTr);
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = currentPlayers.filter(p => 
+            p.name.toLowerCase().includes(query) || 
+            String(p.id).includes(query) ||
+            p.identifiers?.some(id => id.toLowerCase().includes(query))
+        );
+        renderPlayersTable(filtered);
+    });
+}
 
-    if (isSearching() && !search) searchPlayers();
-};
-
-export const extractServerId = (input) => {
-    if (!input) return '';
-
-    let cleanInput = input.trim();
-
-    if (cleanInput.includes('/')) {
-        cleanInput = cleanInput.replace(/\/+$/, '');
-        const parts = cleanInput.split('/');
-        cleanInput = parts[parts.length - 1];
-    }
-
-    cleanInput = cleanInput.split(/[?#]/)[0];
-
-    return cleanInput.trim();
-};
-
-export const isValidServerId = (serverId) => {
-    return typeof serverId === 'string' && /^[a-zA-Z0-9]{6,8}$/.test(serverId);
-};
-
-const arraysEqual = (a, b) => {
-    if (!a || !b) return false;
-    if (a.length !== b.length) return false;
-
-    const aIds = a.map((p) => `${p.id}-${p.name}-${p.ping}`).sort();
-    const bIds = b.map((p) => `${p.id}-${p.name}-${p.ping}`).sort();
-
-    return JSON.stringify(aIds) === JSON.stringify(bIds);
-};
-
-const showLoader = (isVisible) => {
-    if (loader) {
-        loader.style.display = isVisible ? 'flex' : 'none';
-    }
-};
-
-const showNotification = (message, type) => {
-    if (window.createNotification) {
-        window.createNotification({
-            message,
-            type,
-            duration: 3000,
-        });
-    }
-};
+// Przełączanie zakładek
+tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        const target = btn.getAttribute('data-tab');
+        document.getElementById(`${target}-tab`).classList.add('active');
+    });
+});
