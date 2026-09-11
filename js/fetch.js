@@ -26,7 +26,7 @@ async function retryFetch(url, options = {}) {
 			const controller = new AbortController();
 			const timer = setTimeout(() => controller.abort(), timeout);
 
-			const finalUrl = proxy ? proxy + url : url;
+			const finalUrl = proxy ? `${proxy}${encodeURIComponent(url)}` : url;
 
 			try {
 				const response = await fetch(finalUrl, {
