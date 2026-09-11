@@ -16,7 +16,6 @@ async function retryFetch(url, options = {}) {
 	const { retriesPerProxy = 1, timeout = 5000, backoff = 2 } = options;
 	const proxyList = options.proxyList ? [...options.proxyList, ...PROXIES] : PROXIES;
 
-	// If no proxy, fallback to direct request
 	const targets = proxyList.length ? proxyList : [null];
 
 	for (let i = 0; i < targets.length; i++) {
@@ -64,9 +63,7 @@ async function retryFetch(url, options = {}) {
 
 				if (!isLastAttemptForProxy) {
 					const delay = timeout * Math.pow(backoff, attempt);
-
 					console.warn(`Proxy ${proxy || 'direct'} failed (attempt ${attempt + 1}). Retrying in ${delay}ms...`);
-
 					await new Promise((res) => setTimeout(res, delay));
 				} else {
 					console.warn(`Proxy ${proxy || 'direct'} exhausted. Switching to next proxy...`);
@@ -87,7 +84,9 @@ export const fetchServer = (serverId) => {
 
 		showLoader(true);
 
-		refreshButton.onclick = () => fetchServer(serverId);
+		if (refreshButton) {
+			refreshButton.onclick = () => fetchServer(serverId);
+		}
 		
 		const url = `${API_BASE_URL}/${serverId}`;
 		console.info(`Fetching server info`, serverId, url);
@@ -161,6 +160,7 @@ const handleResponse = async (response) => {
 };
 
 const formatPlayers = (players) => {
+	if (!Array.isArray(players)) return [];
 	const formattedPlayers = [];
 	players.forEach((player) => {
 		const socials = {};
@@ -184,6 +184,7 @@ const formatPlayers = (players) => {
 };
 
 const resetTable = () => {
+	if (!table) return;
 	[...table.querySelectorAll('tr')].filter((tr) => tr.id !== 'table-header').forEach((tr) => tr.remove());
 };
 
@@ -191,6 +192,7 @@ const STEAM_LINK = 'https://steamcommunity.com/profiles/%id%';
 const DISCORD_LINK = 'https://discord.com/users/%id%';
 
 export const renderPlayers = (players, search = false) => {
+	if (!table) return;
 	resetTable();
 
 	console.info('Rendering new players', players.length);
