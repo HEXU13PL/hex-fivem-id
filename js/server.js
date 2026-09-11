@@ -18,7 +18,7 @@ export const setServerInfo = (serverId, data) => {
 	}
 
 	if (serverIcon && data.icon) {
-		serverIcon.src = `data:image/png;base64,${data.icon}`;
+		serverIcson.src = `data:image/png;base64,${data.icon}`;
 	}
 
 	if (serverClients) {
