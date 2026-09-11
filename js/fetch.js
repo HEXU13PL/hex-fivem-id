@@ -89,7 +89,6 @@ export const fetchServer = (serverId) => {
 
 		refreshButton.onclick = () => fetchServer(serverId);
 		
-		// POPRAWIONO: usunięto powielony fragment /servers/single/
 		const url = `${API_BASE_URL}/${serverId}`;
 		console.info(`Fetching server info`, serverId, url);
 
@@ -99,7 +98,6 @@ export const fetchServer = (serverId) => {
 				setServerInfo(serverId, json.Data);
 				let playersFetch = false;
 				
-				// POPRAWIONO: usunięto powielony fragment /servers/single/
 				let playerUrl = `${API_BASE_URL}/${serverId}`;
 				fetchPlayers(playerUrl, playersFetch);
 				showNotification('Server data loaded successfully', 'success');
@@ -145,11 +143,21 @@ const fetchPlayers = (url, playersFetch = false) => {
 		});
 };
 
-const handleResponse = (response) => {
+const handleResponse = async (response) => {
 	if (!response.ok) {
 		throw new Error(`HTTP error! Status: ${response.status}`);
 	}
-	return response.json();
+	const text = await response.text();
+	try {
+		return JSON.parse(text);
+	} catch (e) {
+		if (text.toLowerCase().includes('not found')) {
+			const error = new Error('Server not found (404)');
+			error.nonRetryable = true;
+			throw error;
+		}
+		throw new Error('Invalid JSON response from server');
+	}
 };
 
 const formatPlayers = (players) => {
