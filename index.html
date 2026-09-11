@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEX FiveM ID</title>
+    <link rel="icon" type="image/gif" href="https://cdn.nest.rip/uploads/04d2f2f5-1338-4321-815b-10c857650485.gif">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #070709;
+            --bg-secondary: #0f0f14;
+            --bg-card: #14141c;
+            --bg-card-hover: #1c1c28;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(229, 9, 20, 0.4);
+            
+            --accent-red: #e50914;
+            --accent-red-hover: #ff1e27;
+            --accent-red-glow: rgba(229, 9, 20, 0.35);
+            
+            --text-primary: #f8f9fa;
+            --text-secondary: #9a9ab0;
+            --text-muted: #5c5c70;
+            
+            --discord-color: #5865F2;
+            --steam-color: #2a475e;
+            --license-color: #f39c12;
+            --online-color: #00e676;
+            
+            --radius: 12px;
+            --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-primary); 
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(229, 9, 20, 0.15) 0%, transparent 50%),
+                radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 28px 28px;
+            color: var(--text-primary); 
+            padding-bottom: 40px;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: #252533; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-red); }
+
+        main, header, .tabs, .tab-content, .stats-grid { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            padding: 20px 24px; 
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(7, 7, 9, 0.75) !important;
+            backdrop-filter: blur(16px);
+            position: sticky; top: 0; z-index: 50;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+        }
+
+        .header-title-container { display: flex; align-items: center; gap: 14px; }
+        #server-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; box-shadow: 0 0 12px rgba(0,0,0,0.5); }
+        
+        h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px; }
+        h1::before { 
+            content: ''; display: inline-block; width: 5px; height: 26px; 
+            background: linear-gradient(180deg, var(--accent-red-hover), var(--accent-red)); 
+            border-radius: 4px; box-shadow: 0 0 12px var(--accent-red); 
+        }
+
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 8px var(--accent-red-glow); }
+            50% { text-shadow: 0 0 20px var(--accent-red), 0 0 35px var(--accent-red-glow); }
+        }
+        #server-name { animation: neonPulse 3s ease-in-out infinite; }
+
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+
+        /* Statystyki Hero KPI */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 18px 22px;
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        .stat-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px var(--accent-red-glow);
+        }
+        .stat-card .label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 1.8rem; font-weight: 800; margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+        .stat-card .badge-live {
+            position: absolute; top: 18px; right: 18px;
+            background: rgba(0, 230, 118, 0.1); color: var(--online-color);
+            padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 16px; flex-wrap: wrap; }
+        .input-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+        input[type="text"], input[type="search"] {
+            background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 12px 18px; border-radius: var(--radius); outline: none; transition: var(--transition);
+            font-family: inherit; font-size: 0.95rem;
+        }
+        input[type="text"]:focus, input[type="search"]:focus { 
+            border-color: var(--accent-red); 
+            box-shadow: 0 0 0 4px var(--accent-red-glow);
+            background-color: var(--bg-card-hover);
+        }
+
+        button, .btn {
+            background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 12px 20px; border-radius: var(--radius); font-weight: 700; cursor: pointer; 
+            transition: var(--transition); font-family: inherit; font-size: 0.9rem;
+        }
+        button:hover, .btn:hover { 
+            background-color: var(--bg-card-hover); border-color: rgba(255,255,255,0.2); 
+            transform: translateY(-2px);
+        }
+        button.btn-primary, #server-id-button { 
+            background: linear-gradient(135deg, var(--accent-red-hover), var(--accent-red)); 
+            border: none; color: #fff; box-shadow: 0 4px 15px var(--accent-red-glow);
+        }
+        button.btn-primary:hover, #server-id-button:hover { 
+            box-shadow: 0 6px 20px var(--accent-red-glow); transform: translateY(-2px);
+        }
+
+        .icon-button { padding: 12px; border-radius: var(--radius); }
+        .icon-button img { width: 18px; height: 18px; filter: invert(1); opacity: 0.8; }
+
+        .dropdown-container { position: relative; }
+        .dropdown-menu {
+            position: absolute; top: 100%; right: 0; margin-top: 10px; width: 320px;
+            background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); padding: 16px; z-index: 100; display: none;
+            backdrop-filter: blur(10px);
+        }
+        .dropdown-menu.show { display: block; animation: fadeIn 0.2s ease; }
+
+        .tabs { display: flex; gap: 12px; margin-top: 32px; border-bottom: 1px solid var(--border-color); }
+        .tab-button { 
+            background: transparent; border: none; border-bottom: 3px solid transparent; 
+            padding: 14px 22px; color: var(--text-secondary); cursor: pointer; font-weight: 700; font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .tab-button:hover { color: var(--text-primary); }
+        .tab-button.active { border-bottom-color: var(--accent-red); color: #fff; text-shadow: 0 0 10px var(--accent-red-glow); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeInUp 0.3s ease; }
+
+        /* Tabela */
+        .table-container { 
+            margin-top: 16px; background-color: var(--bg-secondary); 
+            border: 1px solid var(--border-color); border-radius: var(--radius); 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { 
+            background-color: var(--bg-card); color: var(--text-secondary); 
+            font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+            padding: 18px 22px; border-bottom: 1px solid var(--border-color); 
+        }
+        td { padding: 16px 22px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        
+        tr:not(#table-header):not(#favorites-table-header):not(.table-footer) {
+            transition: var(--transition);
+        }
+        tr:not(#table-header):not(#favorites-table-header):not(.table-footer):hover { 
+            background-color: var(--bg-card-hover);
+            box-shadow: inset 4px 0 0 var(--accent-red);
+        }
+
+        .table-no { width: 60px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .table-favorite { width: 50px; text-align: center; cursor: pointer; }
+        .table-favorite img { width: 18px; height: 18px; transition: transform 0.2s ease; }
+        .table-favorite:hover img { transform: scale(1.25); }
+        .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; }
+
+        /* Identyfikatory w tabeli jako kolorowe badge */
+        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .id-badge {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+            border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+            text-decoration: none; color: #fff; transition: var(--transition);
+        }
+        .id-badge:hover { transform: translateY(-1px); filter: brightness(1.2); }
+        .id-badge.discord { background-color: rgba(88, 101, 242, 0.2); border: 1px solid rgba(88, 101, 242, 0.4); color: #8ea1ff; }
+        .id-badge.steam { background-color: rgba(42, 71, 94, 0.3); border: 1px solid rgba(102, 192, 244, 0.3); color: #66c0f4; }
+        .id-badge.license { background-color: rgba(243, 156, 18, 0.15); border: 1px solid rgba(243, 156, 18, 0.3); color: #f1c40f; }
+
+        .status-dot-online {
+            width: 8px; height: 8px; background-color: var(--online-color); border-radius: 50%; 
+            display: inline-block; box-shadow: 0 0 10px var(--online-color); margin-right: 8px;
+        }
+
+        .table-footer td { background-color: var(--bg-card); color: var(--text-muted); text-align: center; padding: 28px; font-weight: 600; }
+
+        #notification-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
+        .notification { 
+            background-color: var(--bg-card); border-left: 4px solid var(--accent-red); color: var(--text-primary); 
+            padding: 16px 22px; border-radius: var(--radius); display: flex; align-items: center; justify-content: space-between; 
+            min-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: slideIn 0.3s ease;
+        }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(7, 7, 9, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 999; }
+        .spinner { width: 48px; height: 48px; border: 3px solid var(--border-color); border-top: 3px solid var(--accent-red); border-radius: 50%; animation: spin 0.8s linear infinite; box-shadow: 0 0 15px var(--accent-red-glow); }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title-container">
+            <img id="server-icon" src="https://fivem.net/favicon.png" alt="Server Icon" style="display: none;">
+            <h1 id="server-name">HEX FiveM id</h1>
+        </div>
+        <div class="header-actions">
+            <div class="dropdown-container">
+                <button id="history-button" class="icon-button" title="History"><img src="img/history.svg" alt="History"></button>
+                <div id="history-menu" class="dropdown-menu"></div>
+            </div>
+            
+            <div class="dropdown-container">
+                <button id="favorites-button" class="icon-button" title="Favorites"><img src="img/star.svg" alt="Favorites"></button>
+                <div id="favorites-menu" class="dropdown-menu"></div>
+            </div>
+
+            <button id="theme-toggle" class="icon-button" title="Toggle Theme"><img src="img/moon.svg" alt="Theme"></button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Statystyki Hero KPI -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="badge-live"><span class="status-dot-online"></span> ONLINE</span>
+                <div class="label">Server Status</div>
+                <div class="value" id="stat-status">Ready</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Active Players</div>
+                <div class="value" id="stat-players">0 / 0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Current Server ID</div>
+                <div class="value" id="stat-id">---</div>
+            </div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="input-group">
+                <input type="text" id="server-id" placeholder="Server ID (np. m44oaj)">
+                <button id="server-id-button" class="btn-primary">Connect</button>
+                <button id="refresh-button">Refresh</button>
+            </div>
+
+            <div class="input-group">
+                <input type="search" id="search" placeholder="Search player, ID or hex...">
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="players">Players List</button>
+            <button class="tab-button" data-tab="favorites">Favorite Players</button>
+            <button class="tab-button" data-tab="statistics">Statistics</button>
+        </div>
+
+        <div id="players-tab" class="tab-content active">
+            <div class="table-container">
+                <table id="players-table">
+                    <tr id="table-header">
+                        <th class="table-no">#</th>
+                        <th class="table-favorite">Fav</th>
+                        <th class="table-id">ID</th>
+                        <th class="table-name">Name</th>
+                        <th class="table-socials">Identifiers</th>
+                        <th class="table-ping">Ping</th>
+                    </tr>
+                    <tr class="table-footer">
+                        <td colspan="6">Wpisz Server ID i kliknij Connect...</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="favorites-tab" class="tab-content">
+            <div class="table-container">
+                <table id="favorites-table">
+                    <tr id="favorites-table-header">
+                        <th class="table-no">#</th>
+                        <th class="table-favorite">Fav</th>
+                        <th class="table-id">Key</th>
+                        <th class="table-name">Name</th>
+                        <th class="table-socials">Socials</th>
+                        <th class="table-ping">Status</th>
+                    </tr>
+                    <tr class="table-footer">
+                        <td colspan="6">No favorite players yet.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="statistics-tab" class="tab-content">
+            <div class="table-container" style="padding: 30px; text-align: center;">
+                <h2>Detailed Server Analytics</h2>
+            </div>
+        </div>
+    </main>
+
+    <div id="loader" style="display: none;"><div class="spinner"></div></div>
+    <div id="notification-container"></div>
+
+    <script type="module" src="js/index.js?v=100"></script>
+
+    <script>
+        let titleText = " HEX FiveM ID • ";
+        setInterval(() => {
+            titleText = titleText.substring(1) + titleText.charAt(0);
+            document.title = titleText;
+        }, 300);
+    </script>
+</body>
+</html>
