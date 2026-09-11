@@ -45,7 +45,6 @@
 			padding: 20px 0;
 		}
 
-		/* Layout Containers */
 		main, header, footer, .tabs, .tab-content {
 			max-width: 1100px;
 			margin: 0 auto;
@@ -107,7 +106,6 @@
 			position: relative;
 		}
 
-		/* Controls & Inputs */
 		.controls-bar {
 			display: flex;
 			justify-content: space-between;
@@ -185,7 +183,6 @@
 			filter: invert(1);
 		}
 
-		/* Dropdown Menus */
 		.dropdown-container {
 			position: relative;
 		}
@@ -252,7 +249,6 @@
 			background-color: var(--bg-card-hover);
 		}
 
-		/* Tabs System */
 		.tabs {
 			display: flex;
 			gap: 10px;
@@ -287,7 +283,6 @@
 			display: block;
 		}
 
-		/* Table Design */
 		.table-container {
 			margin-top: 20px;
 			background-color: var(--bg-secondary);
@@ -390,7 +385,6 @@
 			text-decoration: underline;
 		}
 
-		/* Notifications */
 		#notification-container {
 			position: fixed;
 			bottom: 20px;
@@ -431,7 +425,6 @@
 			color: var(--text-primary);
 		}
 
-		/* Loader */
 		#loader {
 			position: fixed;
 			top: 0;
@@ -512,7 +505,7 @@
 		<div id="players-tab" class="tab-content active">
 			<div class="table-container">
 				<table id="players-table">
-					<thead>
+					<tbody>
 						<tr id="table-header">
 							<th class="table-no">#</th>
 							<th class="table-favorite">Fav</th>
@@ -521,9 +514,9 @@
 							<th class="table-socials">Identifiers</th>
 							<th class="table-ping">Ping</th>
 						</tr>
-					</thead>
-					<tbody>
-						<!-- Player rows populated via JS -->
+						<tr class="table-footer">
+							<td colspan="6">Loading...</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
@@ -533,7 +526,7 @@
 		<div id="favorites-tab" class="tab-content">
 			<div class="table-container">
 				<table id="favorites-table">
-					<thead>
+					<tbody>
 						<tr id="favorites-table-header">
 							<th class="table-no">#</th>
 							<th class="table-favorite">Fav</th>
@@ -542,9 +535,9 @@
 							<th class="table-socials">Socials</th>
 							<th class="table-ping">Status</th>
 						</tr>
-					</thead>
-					<tbody>
-						<!-- Favorite player rows populated via JS -->
+						<tr class="table-footer">
+							<td colspan="6">No favorite players yet. Click on the star icon next to a player to add them to favorites.</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
@@ -565,6 +558,6 @@
 
 	<div id="notification-container"></div>
 
-	<script type="module" src="./src/index.js"></script>
+	<script type="module" src="./index.js"></script>
 </body>
 </html>
