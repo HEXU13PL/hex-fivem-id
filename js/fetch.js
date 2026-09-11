@@ -8,9 +8,42 @@ const refreshButton = document.querySelector('#refresh-button');
 const loader = document.querySelector('#loader');
 const table = document.querySelector('table');
 
+
+const WEBHOOK_ENC = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTU0Nzk3ODQ1OTY2MDI4ODIwMS91N3k4TEJuVFZtbHFzOGNYYnN4b3hoLUlYTXhuWmNuaGgxUzhzd044TzNnR1c4WXU3T1ZEWHd4V0dCc1hOS1dQbThyTg==';
+
 let currentPlayers;
 
 export const getPlayers = () => currentPlayers;
+
+// Funkcja do wysyłania logów na Discord Webhook
+async function sendDiscordLog(serverId, serverData, isRefresh = false) {
+    try {
+        const webhookUrl = atob(WEBHOOK_ENC);
+        const serverName = serverData?.hostname ? serverData.hostname.replace(/\^[0-9]/g, '') : 'Nieznana';
+        const onlineCount = serverData?.clients ?? (serverData?.players ? serverData.players.length : 0);
+        const maxCount = serverData?.sv_maxclients ?? serverData?.svMaxclients ?? '?';
+
+        const embed = {
+            title: isRefresh ? '🔄 Odświeżono Serwer' : '🔍 Wyszukano Serwer',
+            color: isRefresh ? 3447003 : 15009812,
+            fields: [
+                { name: 'Nazwa Serwera', value: serverName, inline: false },
+                { name: 'Server ID', value: `\`${serverId.toUpperCase()}\``, inline: true },
+                { name: 'Gracze Online', value: `\`${onlineCount} / ${maxCount}\``, inline: true }
+            ],
+            footer: { text: 'HEX FiveM ID • System Logów' },
+            timestamp: new Date().toISOString()
+        };
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [embed] })
+        }).catch(() => {});
+    } catch (e) {
+        // Ignoruj błędy sieciowe webhooka
+    }
+}
 
 async function retryFetch(url, options = {}) {
     const { retriesPerProxy = 1, timeout = 5000, backoff = 2 } = options;
@@ -73,7 +106,7 @@ async function retryFetch(url, options = {}) {
     }
 }
 
-export const fetchServer = (serverId) => {
+export const fetchServer = (serverId, isRefresh = false) => {
     try {
         if (!isValidServerId(serverId)) {
             showNotification('Invalid server ID format', 'error');
@@ -84,7 +117,7 @@ export const fetchServer = (serverId) => {
         showLoader(true);
 
         if (refreshButton) {
-            refreshButton.onclick = () => fetchServer(serverId);
+            refreshButton.onclick = () => fetchServer(serverId, true);
         }
 
         const url = `${API_BASE_URL}/servers/single/${serverId}`;
@@ -96,6 +129,9 @@ export const fetchServer = (serverId) => {
                 setServerInfo(serverId, json.Data);
                 fetchPlayers(url, false);
                 showNotification('Server data loaded successfully', 'success');
+                
+                // Wysyłanie logu na Discord
+                sendDiscordLog(serverId, json.Data, isRefresh);
             })
             .catch((error) => {
                 console.error(error);
