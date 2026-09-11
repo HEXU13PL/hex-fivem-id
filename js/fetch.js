@@ -62,7 +62,6 @@ async function retryFetch(url, options = {}) {
 					throw err;
 				}
 
-				// ✅ Only delay if retrying SAME proxy
 				if (!isLastAttemptForProxy) {
 					const delay = timeout * Math.pow(backoff, attempt);
 
@@ -70,7 +69,6 @@ async function retryFetch(url, options = {}) {
 
 					await new Promise((res) => setTimeout(res, delay));
 				} else {
-					// Optional: log switch to next proxy
 					console.warn(`Proxy ${proxy || 'direct'} exhausted. Switching to next proxy...`);
 				}
 			}
@@ -90,16 +88,20 @@ export const fetchServer = (serverId) => {
 		showLoader(true);
 
 		refreshButton.onclick = () => fetchServer(serverId);
-		const url = `${API_BASE_URL}/servers/single/${serverId}`;
+		
+		// POPRAWIONO: usunięto powielony fragment /servers/single/
+		const url = `${API_BASE_URL}/${serverId}`;
 		console.info(`Fetching server info`, serverId, url);
 
 		retryFetch(url, { headers: DEFAULT_HEADERS })
 			.then(handleResponse)
 			.then((json) => {
 				setServerInfo(serverId, json.Data);
-				let playersFetch = false; //Todo
-				let url = `${API_BASE_URL}/servers/single/${serverId}`;
-				fetchPlayers(url, playersFetch);
+				let playersFetch = false;
+				
+				// POPRAWIONO: usunięto powielony fragment /servers/single/
+				let playerUrl = `${API_BASE_URL}/${serverId}`;
+				fetchPlayers(playerUrl, playersFetch);
 				showNotification('Server data loaded successfully', 'success');
 			})
 			.catch((error) => {
@@ -127,7 +129,6 @@ const fetchPlayers = (url, playersFetch = false) => {
 			let players = playersFetch ? json : json.Data.players;
 			players = formatPlayers(players);
 
-			// Only update if players changed
 			if (!arraysEqual(currentPlayers, players)) {
 				currentPlayers = players;
 				renderPlayers(players);
@@ -188,7 +189,6 @@ export const renderPlayers = (players, search = false) => {
 	let index = 1;
 	players.forEach((player) => {
 		const tr = document.createElement('tr');
-		// Ajoute la clé stable comme attribut pour la gestion des favoris
 		const playerKey = getPlayerKey(player);
 		tr.setAttribute('data-player-key', playerKey);
 
@@ -284,15 +284,12 @@ export const extractServerId = (input) => {
 
 	let cleanInput = input.trim();
 
-	// If it contains slashes, get the last path segment
 	if (cleanInput.includes('/')) {
-		// Remove trailing slashes
 		cleanInput = cleanInput.replace(/\/+$/, '');
 		const parts = cleanInput.split('/');
 		cleanInput = parts[parts.length - 1];
 	}
 
-	// Strip query parameters or hashes
 	cleanInput = cleanInput.split(/[?#]/)[0];
 
 	return cleanInput.trim();
@@ -306,7 +303,6 @@ const arraysEqual = (a, b) => {
 	if (!a || !b) return false;
 	if (a.length !== b.length) return false;
 
-	// Simple comparison of player IDs and names
 	const aIds = a.map((p) => `${p.id}-${p.name}-${p.ping}`).sort();
 	const bIds = b.map((p) => `${p.id}-${p.name}-${p.ping}`).sort();
 
@@ -319,7 +315,6 @@ const showLoader = (isVisible) => {
 	}
 };
 
-// Notification system
 const showNotification = (message, type) => {
 	if (window.createNotification) {
 		window.createNotification({
