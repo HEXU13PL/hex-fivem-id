@@ -9,7 +9,7 @@ const loader = document.querySelector('#loader');
 const table = document.querySelector('table');
 
 
-const WEBHOOK_ENC = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTU0Nzk3ODQ1OTY2MDI4ODIwMS91N3k4TEJuVFZtbHFzOGNYYnN4b3hoLUlYTXhuWmNuaGgxUzhzd044TzNnR1c4WXU3T1ZEWHd4V0dCc1hOS1dQbThyTg==';
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN';
 
 let currentPlayers;
 
@@ -17,8 +17,9 @@ export const getPlayers = () => currentPlayers;
 
 // Funkcja do wysyłania logów na Discord Webhook
 async function sendDiscordLog(serverId, serverData, isRefresh = false) {
+    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('TUTAJ_WKLEJ_NOWY_WEBHOOK')) return;
+
     try {
-        const webhookUrl = atob(WEBHOOK_ENC);
         const serverName = serverData?.hostname ? serverData.hostname.replace(/\^[0-9]/g, '') : 'Nieznana';
         const onlineCount = serverData?.clients ?? (serverData?.players ? serverData.players.length : 0);
         const maxCount = serverData?.sv_maxclients ?? serverData?.svMaxclients ?? '?';
@@ -35,13 +36,13 @@ async function sendDiscordLog(serverId, serverData, isRefresh = false) {
             timestamp: new Date().toISOString()
         };
 
-        fetch(webhookUrl, {
+        fetch(DISCORD_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ embeds: [embed] })
         }).catch(() => {});
     } catch (e) {
-        // Ignoruj błędy sieciowe webhooka
+        // Ignoruj błędy
     }
 }
 
@@ -130,7 +131,6 @@ export const fetchServer = (serverId, isRefresh = false) => {
                 fetchPlayers(url, false);
                 showNotification('Server data loaded successfully', 'success');
                 
-                // Wysyłanie logu na Discord
                 sendDiscordLog(serverId, json.Data, isRefresh);
             })
             .catch((error) => {
@@ -250,7 +250,6 @@ export const renderPlayers = (players, search = false) => {
         id.textContent = player.id;
         name.textContent = player.name;
 
-        // Badge Discorda z kopiowaniem formatu <@id>
         if (player.socials && player.socials.discord) {
             const discordId = player.socials.discord;
             const mentionFormat = `<@${discordId}>`;
