@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from './constants.js';
+import { STORAGE_KEYS } from './utils/constants.js';
 
 export const initTabs = () => {
 	const tabButtons = document.querySelectorAll('.tab-button');
