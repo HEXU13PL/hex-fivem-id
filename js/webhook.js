@@ -1,90 +1,99 @@
 import { getPlayers } from './fetch.js';
 
-// Twój adres URL webhooka z Discorda
+// TUTAJ WKLEJ SWÓJ ADRES WEBHOOKA Z DISCORDA
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN';
 
-// Czas w milisekundach (5 minut = 300 000 ms)
-const INTERVAL_TIME = 5 * 60 * 1000; 
-
-let webhookInterval = null;
-
-const showNotification = (message, type) => {
-    if (window.createNotification) {
+const showNotification = (message, type = 'info') => {
+    if (typeof window.createNotification === 'function') {
         window.createNotification({
             message,
             type,
-            duration: 3000,
+            duration: 4000,
         });
+    } else {
+        alert(`${type.toUpperCase()}: ${message}`);
     }
 };
 
 export async function sendPlayersToDiscordManual() {
+    // 1. Sprawdzenie czy wklejono URL
     if (!WEBHOOK_URL || WEBHOOK_URL.includes('TUTAJ_WKLEJ')) {
-        showNotification('Ustaw URL webhooka w js/webhook.js!', 'error');
+        showNotification('Ustaw prawidłowy URL webhooka w pliku js/webhook.js!', 'error');
+        console.error('[Webhook] Brak poprawnego URL w pliku js/webhook.js');
         return;
     }
 
+    // 2. Pobranie graczy z aplikacji
     const players = getPlayers();
 
-    if (!players || players.length === 0) {
-        showNotification('Brak danych o graczach do wysłania', 'error');
+    if (!players || !Array.isArray(players) || players.length === 0) {
+        showNotification('Brak pobranych graczy do wysłania. Połącz się najpierw z serwerem!', 'error');
         return;
     }
 
+    // 3. Przygotowanie treści (Discord ma limit 2000 znaków na wiadomość)
     const playerListString = players
-        .slice(0, 50)
-        .map((p) => `\`[ID: ${p.id}]\` **${p.name}** (${p.ping}ms)`)
+        .slice(0, 30) // ograniczenie do 30 graczy w jednej wiadomości
+        .map((p) => `\`[ID: ${p.id || '?'}]\` **${p.name || 'Nieznany'}** (${p.ping ?? '?'}ms)`)
         .join('\n');
 
-    const embed = {
-        title: `📊 Aktualna lista graczy (${players.length})`,
-        color: 0x5865f2,
-        description: playerListString || 'Brak graczy online',
-        timestamp: new Date().toISOString(),
-        footer: {
-            text: 'HEX FiveM id • Manual Export',
-        },
+    const payload = {
+        embeds: [
+            {
+                title: `📊 Aktualna lista graczy online (${players.length})`,
+                color: 0x5865f2,
+                description: playerListString || 'Brak graczy',
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: 'HEX FiveM Browser',
+                },
+            },
+        ],
     };
 
+    // Użycie publicznego CORS Proxy, ponieważ przeglądarki blokują bezpośrednie requesty fetch do Discord API
+    const targetUrl = WEBHOOK_URL.trim();
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+
     try {
-        const response = await fetch(WEBHOOK_URL, {
+        showNotification('Wysyłanie danych na Discorda...', 'info');
+
+        let response = await fetch(proxyUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                embeds: [embed],
-            }),
+            body: JSON.stringify(payload),
         });
 
-        if (response.ok) {
-            showNotification('Wysłano listę graczy na Discorda!', 'success');
+        // Backup próba wysłania bezpośrednio, jeśli proxy zawiedzie
+        if (!response.ok && response.status !== 204) {
+            response = await fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+        }
+
+        if (response.ok || response.status === 204) {
+            showNotification('Pomyślnie wysłano listę graczy na Discorda!', 'success');
         } else {
-            showNotification(`Błąd wysyłania: Status ${response.status}`, 'error');
+            const errText = await response.text();
+            console.error('[Webhook Error]', response.status, errText);
+            showNotification(`Błąd Discorda (${response.status}). Sprawdź konsolę (F12).`, 'error');
         }
     } catch (error) {
-        console.error('Błąd podczas wysyłania webhooka:', error);
-        showNotification('Błąd połączenia z Discordem', 'error');
+        console.error('[Webhook Catch Error]', error);
+        showNotification('Błąd połączenia. Sprawdź konsolę (F12).', 'error');
     }
 }
 
-export const startWebhookNotifier = () => {
-    if (webhookInterval) return;
-
-    console.info('Webhook notifier started (every 5 minutes)');
-
-    webhookInterval = setInterval(() => {
-        sendPlayersToDiscordManual();
-    }, INTERVAL_TIME);
-};
-
-// Obsługa przycisku w HTML (jeśli przycisk ma id="send-webhook-button")
+// Podpięcie event listenera po załadowaniu DOM
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.querySelector('#send-webhook-button');
     if (btn) {
         btn.addEventListener('click', sendPlayersToDiscordManual);
     }
 });
-
-// Automatyczny interval w tle
-startWebhookNotifier();
