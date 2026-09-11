@@ -8,6 +8,9 @@ import { showNotification } from './notifications.js';
 import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
 
+// FiveCity vp4rxq
+// Pixa vqkdxx
+
 window.addEventListener('DOMContentLoaded', () => {
     // Initialize features
     initializeSearch();
@@ -42,7 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const serverBtn = document.querySelector('#server-id-button');
     if (serverBtn) {
         serverBtn.onclick = () => {
-            const rawValue = serverIdSearch ? serverIdSearch.value.trim() : '';
+            const rawValue = serverIdSearch.value.trim();
             if (rawValue.length < 1) {
                 showNotification('Please enter a server ID', 'warning');
                 return;
