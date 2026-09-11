@@ -25,7 +25,10 @@ async function fetchServerData(serverId) {
     showLoader(true);
     
     try {
-        const response = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${serverId}`);
+        const targetUrl = `https://servers-frontend.fivem.net/api/servers/single/${serverId}`;
+        // Użycie CORS Proxy do obejścia blokady na GitHub Pages
+        const response = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+        
         if (!response.ok) throw new Error('Nie znaleziono serwera lub serwer jest offline.');
         
         const json = await response.json();
@@ -33,7 +36,7 @@ async function fetchServerData(serverId) {
 
         currentPlayers = data.players || [];
         
-        // Czyszczenie i ustawianie nazwy serwera
+        // Nazwa serwera
         if (serverNameEl && data.hostname) {
             const cleanName = data.hostname.replace(/\^[0-9]/g, '');
             serverNameEl.textContent = cleanName.length > 30 ? cleanName.substring(0, 30) + '...' : cleanName;
