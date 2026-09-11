@@ -25,7 +25,7 @@ async function retryFetch(url, options = {}) {
 			const controller = new AbortController();
 			const timer = setTimeout(() => controller.abort(), timeout);
 
-			const finalUrl = proxy ? `${proxy}${encodeURIComponent(url)}` : url;
+			const finalUrl = proxy ? proxy + url : url;
 
 			try {
 				const response = await fetch(finalUrl, {
@@ -87,8 +87,8 @@ export const fetchServer = (serverId) => {
 		if (refreshButton) {
 			refreshButton.onclick = () => fetchServer(serverId);
 		}
-		
-		const url = `${API_BASE_URL}/${serverId}`;
+
+		const url = `${API_BASE_URL}/servers/single/${serverId}`;
 		console.info(`Fetching server info`, serverId, url);
 
 		retryFetch(url, { headers: DEFAULT_HEADERS })
@@ -96,9 +96,8 @@ export const fetchServer = (serverId) => {
 			.then((json) => {
 				setServerInfo(serverId, json.Data);
 				let playersFetch = false;
-				
-				let playerUrl = `${API_BASE_URL}/${serverId}`;
-				fetchPlayers(playerUrl, playersFetch);
+				let url = `${API_BASE_URL}/servers/single/${serverId}`;
+				fetchPlayers(url, playersFetch);
 				showNotification('Server data loaded successfully', 'success');
 			})
 			.catch((error) => {
@@ -142,21 +141,11 @@ const fetchPlayers = (url, playersFetch = false) => {
 		});
 };
 
-const handleResponse = async (response) => {
+const handleResponse = (response) => {
 	if (!response.ok) {
 		throw new Error(`HTTP error! Status: ${response.status}`);
 	}
-	const text = await response.text();
-	try {
-		return JSON.parse(text);
-	} catch (e) {
-		if (text.toLowerCase().includes('not found')) {
-			const error = new Error('Server not found (404)');
-			error.nonRetryable = true;
-			throw error;
-		}
-		throw new Error('Invalid JSON response from server');
-	}
+	return response.json();
 };
 
 const formatPlayers = (players) => {
