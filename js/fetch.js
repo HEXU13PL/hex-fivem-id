@@ -298,7 +298,7 @@ export const renderPlayers = (players, search = false) => {
     link.href = 'https://github.com/HEXU13PL';
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.textContent = 'hex';
+    link.textContent = 'HEX';
 
     span2.appendChild(link);
     span2.appendChild(document.createTextNode('.'));
