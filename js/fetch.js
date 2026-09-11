@@ -1,7 +1,10 @@
 import { showNotification } from './notifications.js';
 
-// Wklej swój webhook poniżej
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN'; 
+let currentPlayers = [];
+
+export function getPlayers() {
+    return currentPlayers;
+}
 
 export function isValidServerId(id) {
     return typeof id === 'string' && id.length >= 5 && /^[a-zA-Z0-9]+$/.test(id);
@@ -13,34 +16,7 @@ export function extractServerId(input) {
     return match ? match[1] : input;
 }
 
-async function sendDiscordLog(actionType, serverId, onlineCount = 0, maxCount = 0, serverName = '') {
-    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('TUTAJ_WKLEJ_SWOJ_WEBHOOK')) return;
-
-    const isRefresh = actionType === 'refresh';
-    const embed = {
-        title: isRefresh ? '🔄 Odświeżono Serwer' : '🔍 Wyszukano Serwer',
-        color: isRefresh ? 3447003 : 15009812,
-        fields: [
-            { name: 'Nazwa Serwera', value: serverName || 'Nieznana', inline: false },
-            { name: 'Server ID', value: `\`${serverId.toUpperCase()}\``, inline: true },
-            { name: 'Gracze Online', value: `\`${onlineCount} / ${maxCount}\``, inline: true }
-        ],
-        footer: { text: 'HEX FiveM ID • System Logów' },
-        timestamp: new Date().toISOString()
-    };
-
-    try {
-        await fetch(DISCORD_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [embed] })
-        });
-    } catch (err) {
-        console.error('Błąd wysyłania logów na Discord:', err);
-    }
-}
-
-export async function fetchServer(serverId, actionType = 'connect') {
+export async function fetchServer(serverId) {
     if (!serverId) return;
     
     const loader = document.querySelector('#loader');
@@ -55,7 +31,9 @@ export async function fetchServer(serverId, actionType = 'connect') {
         const json = await response.json();
         const data = json.Data;
 
-        const onlineCount = data.clients ?? (data.players ? data.players.length : 0);
+        currentPlayers = data.players || [];
+
+        const onlineCount = data.clients ?? currentPlayers.length;
         const maxCount = data.sv_maxclients ?? data.svMaxclients ?? '?';
         const cleanName = data.hostname ? data.hostname.replace(/\^[0-9]/g, '') : serverId;
 
@@ -69,8 +47,6 @@ export async function fetchServer(serverId, actionType = 'connect') {
         if (statStatus) statStatus.textContent = 'Online';
         if (statId) statId.textContent = serverId.toUpperCase();
         if (statPlayers) statPlayers.textContent = `${onlineCount} / ${maxCount}`;
-
-        sendDiscordLog(actionType, serverId, onlineCount, maxCount, cleanName);
 
         showNotification(`Pomyślnie załadowano serwer ${serverId.toUpperCase()}`);
         return data;

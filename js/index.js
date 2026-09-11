@@ -9,7 +9,7 @@ import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Inicjalizacja modułów
+    // Initialize features
     initializeSearch();
     initTheme();
     initFavorites();
@@ -17,7 +17,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initStatistics();
     initTabs();
 
-    // Szukanie po wpisaniu ID w input (Enter)
+    // Server Id Search Input
     const serverIdSearch = document.querySelector('#server-id');
     if (serverIdSearch) {
         serverIdSearch.addEventListener('keyup', (event) => {
@@ -32,14 +32,13 @@ window.addEventListener('DOMContentLoaded', () => {
                     showNotification('Please enter a valid server ID', 'error');
                     return;
                 }
-                fetchServer(value, 'connect');
+                fetchServer(value);
                 setId(value);
                 console.info('Fetching by input.');
             }
         });
     }
 
-    // Szukanie po kliknięciu przycisku
     const serverBtn = document.querySelector('#server-id-button');
     if (serverBtn) {
         serverBtn.onclick = () => {
@@ -53,31 +52,18 @@ window.addEventListener('DOMContentLoaded', () => {
                 showNotification('Please enter a valid server ID', 'error');
                 return;
             }
-            fetchServer(value, 'connect');
+            fetchServer(value);
             setId(value);
             console.info('Fetching by input.');
         };
     }
 
-    // Odświeżanie
-    const refreshBtn = document.querySelector('#refresh-button');
-    if (refreshBtn) {
-        refreshBtn.onclick = () => {
-            const rawValue = serverIdSearch ? serverIdSearch.value.trim() : '';
-            const value = extractServerId(rawValue) || localStorage.getItem(STORAGE_KEYS.SERVER_ID);
-            if (value && isValidServerId(value)) {
-                fetchServer(value, 'refresh');
-            }
-        };
-    }
-
-    // Ładowanie z adresu URL
     const url = new URL(window.location.href);
     if (url.searchParams.has('serverId')) {
         const rawServerId = url.searchParams.get('serverId');
         const serverId = extractServerId(rawServerId);
         if (serverId && isValidServerId(serverId)) {
-            fetchServer(serverId, 'connect');
+            fetchServer(serverId);
             setId(serverId);
             console.info('Fetching by URL.');
             return;
@@ -86,12 +72,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Ładowanie z LocalStorage
     const storageServerId = localStorage.getItem(STORAGE_KEYS.SERVER_ID);
     if (storageServerId) {
         const serverId = extractServerId(storageServerId);
         if (isValidServerId(serverId)) {
-            fetchServer(serverId, 'connect');
+            fetchServer(serverId);
             setId(serverId);
             console.info('Fetching by localStorage.');
         } else {
