@@ -214,21 +214,37 @@ export const renderPlayers = (players, search = false) => {
         id.textContent = player.id;
         name.textContent = player.name;
 
-        // Badge Discorda obok nicku
+        // Badge Discorda z kopiowaniem formatu <@id>
         if (player.socials && player.socials.discord) {
             const discordId = player.socials.discord;
+            const mentionFormat = `<@${discordId}>`;
+
             const discordContainer = document.createElement('span');
             discordContainer.className = 'discord-user-badge';
-            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle;';
+            discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
+            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s;';
 
-            // Domyślny wygląd z ID
             discordContainer.innerHTML = `
                 <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Discord" style="width: 14px; height: 14px; border-radius: 50%;">
                 <span>${discordId}</span>
             `;
+
+            discordContainer.onmouseover = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.3)'; };
+            discordContainer.onmouseout = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.15)'; };
+
+            discordContainer.onclick = (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(mentionFormat)
+                    .then(() => {
+                        showNotification(`Skopiowano: ${mentionFormat}`, 'success');
+                    })
+                    .catch(() => {
+                        showNotification('Nie udało się skopiować danych', 'error');
+                    });
+            };
+
             name.appendChild(discordContainer);
 
-            // Dociąganie nicku i avataru (Lanyard API)
             fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
                 .then((res) => res.json())
                 .then((data) => {
