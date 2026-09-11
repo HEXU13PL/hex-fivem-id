@@ -1,24 +1,39 @@
-import { updateCharts } from './statistics.js';
-import { renderFavoritePlayers } from './favorites.js';
+import { STORAGE_KEYS } from './constants.js';
 
 export const initTabs = () => {
-  const tabs = document.querySelectorAll('.tab');
-  const tabContents = document.querySelectorAll('.tab-content');
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tabContents.forEach(c => c.classList.remove('active'));
-      
-      tab.classList.add('active');
-      const tabName = tab.getAttribute('data-tab');
-      document.getElementById(`${tabName}-tab`).classList.add('active');
-      
-      if (tabName === 'statistics') {
-        updateCharts();
-      } else if (tabName === 'favorites') {
-        renderFavoritePlayers();
-      }
-    });
-  });
+	const tabButtons = document.querySelectorAll('.tab-button');
+	const tabContents = document.querySelectorAll('.tab-content');
+
+	if (!tabButtons.length) return;
+
+	const switchTab = (tabId) => {
+		tabButtons.forEach((btn) => {
+			if (btn.getAttribute('data-tab') === tabId) {
+				btn.classList.add('active');
+			} else {
+				btn.classList.remove('active');
+			}
+		});
+
+		tabContents.forEach((content) => {
+			if (content.id === `${tabId}-tab`) {
+				content.classList.add('active');
+			} else {
+				content.classList.remove('active');
+			}
+		});
+
+		localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, tabId);
+	};
+
+	tabButtons.forEach((button) => {
+		button.addEventListener('click', () => {
+			const tabId = button.getAttribute('data-tab');
+			if (tabId) switchTab(tabId);
+		});
+	});
+
+	// Odczyt zapisanej zakładki lub domyślna 'players'
+	const savedTab = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || 'players';
+	switchTab(savedTab);
 };
