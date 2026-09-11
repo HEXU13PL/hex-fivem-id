@@ -263,10 +263,10 @@ export const renderPlayers = (players, search = false) => {
 	span2.appendChild(document.createTextNode('Created by '));
 
 	const link = document.createElement('a');
-	link.href = 'https://github.com/igorovh';
+	link.href = '';
 	link.target = '_blank';
 	link.rel = 'noopener noreferrer';
-	link.textContent = 'igorovh';
+	link.textContent = '';
 
 	span2.appendChild(link);
 	span2.appendChild(document.createTextNode('.'));
