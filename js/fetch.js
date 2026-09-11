@@ -214,13 +214,21 @@ export const renderPlayers = (players, search = false) => {
         id.textContent = player.id;
         name.textContent = player.name;
 
-        // Pobieranie profilu Discord (Avatar + Nick) po prawej stronie nicku
+        // Badge Discorda obok nicku
         if (player.socials && player.socials.discord) {
             const discordId = player.socials.discord;
             const discordContainer = document.createElement('span');
             discordContainer.className = 'discord-user-badge';
-            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.85em; color: #a3a3a3; background: rgba(88, 101, 242, 0.12); padding: 2px 8px; border-radius: 12px; vertical-align: middle;';
+            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle;';
 
+            // Domyślny wygląd z ID
+            discordContainer.innerHTML = `
+                <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Discord" style="width: 14px; height: 14px; border-radius: 50%;">
+                <span>${discordId}</span>
+            `;
+            name.appendChild(discordContainer);
+
+            // Dociąganie nicku i avataru (Lanyard API)
             fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
                 .then((res) => res.json())
                 .then((data) => {
@@ -231,10 +239,9 @@ export const renderPlayers = (players, search = false) => {
                             : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
                         discordContainer.innerHTML = `
-                            <img src="${avatarUrl}" alt="Discord Avatar" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;">
+                            <img src="${avatarUrl}" alt="Avatar" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover;">
                             <span>@${user.username}</span>
                         `;
-                        name.appendChild(discordContainer);
                     }
                 })
                 .catch(() => {});
@@ -273,7 +280,6 @@ export const renderPlayers = (players, search = false) => {
         table.appendChild(tr);
     });
 
-    // POPRAWIONA STOPKA TABELI (colSpan = 6 zamiast rowSpan = 5)
     const footerTr = document.createElement('tr');
     footerTr.className = 'table-footer';
 
@@ -292,7 +298,7 @@ export const renderPlayers = (players, search = false) => {
     link.href = 'https://github.com/HEXU13PL';
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.textContent = 'HEX';
+    link.textContent = 'hex';
 
     span2.appendChild(link);
     span2.appendChild(document.createTextNode('.'));
