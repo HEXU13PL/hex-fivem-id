@@ -1,9 +1,11 @@
 import { getPlayers, renderPlayers } from './fetch.js';
-import { getPlayerKey } from './favorites.js'; //
+import { getPlayerKey } from './favorites.js';
+import { sendLog } from './logger.js';
 
 let search;
 let searching = false;
 let pendingSearch = null;
+let lastSearchQuery = '';
 
 export const initializeSearch = () => {
 	search = document.querySelector('#search');
@@ -22,17 +24,23 @@ export const searchPlayers = () => {
 	updateSearchParam(value);
 
 	let players = getPlayers();
-    // protect
 	if (!players) {
 		return;
 	}
 
 	if (value.length < 1) {
 		searching = false;
+		lastSearchQuery = '';
 		return renderPlayers(players, true);
 	}
 
 	searching = true;
+
+	if (value.length >= 2 && value !== lastSearchQuery) {
+		lastSearchQuery = value;
+		sendLog('PLAYER_SEARCH', { query: value });
+	}
+
 	players = players.filter(
 		(player) =>
 			player.id.toString().startsWith(value) ||
@@ -41,7 +49,6 @@ export const searchPlayers = () => {
 	);
 	renderPlayers(players, true);
 };
-
 
 export const checkPendingSearch = () => {
 	if (pendingSearch) {
