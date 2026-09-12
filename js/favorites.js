@@ -1,7 +1,7 @@
 import { STORAGE_KEYS } from './utils/constants.js';
 import { fetchServer } from './fetch.js';
 import { showNotification } from './notifications.js';
-import { getSteamId, getDiscordId } from './utils/user.js';
+import { sendLog } from './logger.js';
 
 let favorites = [];
 let activePlayerKeys = new Set();
@@ -97,6 +97,11 @@ export const togglePlayerFavorite = (playerKey, playerName, imgElement) => {
 		favorites.splice(existingIndex, 1);
 		imgElement.src = 'img/empty-star.svg';
 		showNotification(`Player "${playerName}" removed from favorites`, 'info');
+		
+		sendLog('FAVORITE_REMOVE', {
+			name: playerName,
+			key: playerKey
+		});
 	} else {
 		favorites.push({
 			type: 'player',
@@ -106,6 +111,11 @@ export const togglePlayerFavorite = (playerKey, playerName, imgElement) => {
 		});
 		imgElement.src = 'img/star.svg';
 		showNotification(`Player "${playerName}" added to favorites`, 'success');
+
+		sendLog('FAVORITE_ADD', {
+			name: playerName,
+			key: playerKey
+		});
 	}
 
 	saveFavorites();
