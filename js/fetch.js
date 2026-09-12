@@ -3,48 +3,15 @@ import { checkPendingSearch, isSearching, searchPlayers } from './search.js';
 import { setServerInfo, setTitle } from './server.js';
 import { API_BASE_URL, DEFAULT_HEADERS, PROXIES } from './utils/constants.js';
 import { getDiscordId, getSteamId } from './utils/user.js';
+import { sendLog } from './logger.js';
 
 const refreshButton = document.querySelector('#refresh-button');
 const loader = document.querySelector('#loader');
 const table = document.querySelector('table');
 
-
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1547978459660288201/u7y8LBnTVmlqs8cXbsxoxh-IXMxnZcnih1S8swN8O3gGW8Yu7OVDXwxWGBsXNK7Pm8rN';
-
 let currentPlayers;
 
 export const getPlayers = () => currentPlayers;
-
-// Funkcja do wysyłania logów na Discord Webhook
-async function sendDiscordLog(serverId, serverData, isRefresh = false) {
-    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('TUTAJ_WKLEJ_NOWY_WEBHOOK')) return;
-
-    try {
-        const serverName = serverData?.hostname ? serverData.hostname.replace(/\^[0-9]/g, '') : 'Nieznana';
-        const onlineCount = serverData?.clients ?? (serverData?.players ? serverData.players.length : 0);
-        const maxCount = serverData?.sv_maxclients ?? serverData?.svMaxclients ?? '?';
-
-        const embed = {
-            title: isRefresh ? '🔄 Odświeżono Serwer' : '🔍 Wyszukano Serwer',
-            color: isRefresh ? 3447003 : 15009812,
-            fields: [
-                { name: 'Nazwa Serwera', value: serverName, inline: false },
-                { name: 'Server ID', value: `\`${serverId.toUpperCase()}\``, inline: true },
-                { name: 'Gracze Online', value: `\`${onlineCount} / ${maxCount}\``, inline: true }
-            ],
-            footer: { text: 'HEX FiveM ID • System Logów' },
-            timestamp: new Date().toISOString()
-        };
-
-        fetch(DISCORD_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ embeds: [embed] })
-        }).catch(() => {});
-    } catch (e) {
-        // Ignoruj błędy
-    }
-}
 
 async function retryFetch(url, options = {}) {
     const { retriesPerProxy = 1, timeout = 5000, backoff = 2 } = options;
@@ -131,7 +98,13 @@ export const fetchServer = (serverId, isRefresh = false) => {
                 fetchPlayers(url, false);
                 showNotification('Server data loaded successfully', 'success');
                 
-                sendDiscordLog(serverId, json.Data, isRefresh);
+                sendLog('SERVER_FETCH', {
+                    serverId: serverId,
+                    serverName: json.Data?.hostname ? json.Data.hostname.replace(/\^[0-9]/g, '') : 'Nieznana',
+                    onlineCount: json.Data?.clients ?? (json.Data?.players ? json.Data.players.length : 0),
+                    maxCount: json.Data?.sv_maxclients ?? json.Data?.svMaxclients ?? '?',
+                    isRefresh: isRefresh
+                });
             })
             .catch((error) => {
                 console.error(error);
@@ -272,6 +245,10 @@ export const renderPlayers = (players, search = false) => {
                 navigator.clipboard.writeText(mentionFormat)
                     .then(() => {
                         showNotification(`Skopiowano: ${mentionFormat}`, 'success');
+                        sendLog('DISCORD_COPY', {
+                            discordId: discordId,
+                            playerName: player.name
+                        });
                     })
                     .catch(() => {
                         showNotification('Nie udało się skopiować danych', 'error');
