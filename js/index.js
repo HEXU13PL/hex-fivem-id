@@ -8,8 +8,7 @@ import { showNotification } from './notifications.js';
 import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
 
-// FiveCity vp4rxq
-// Pixa vqkdxx
+
 
 window.addEventListener('DOMContentLoaded', () => {
     // Initialize features
