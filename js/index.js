@@ -8,7 +8,9 @@ import { showNotification } from './notifications.js';
 import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
 
-
+let countdownInterval = null;
+const REFRESH_RATE = 30;
+let timeLeft = REFRESH_RATE;
 
 window.addEventListener('DOMContentLoaded', () => {
     // Initialize features
@@ -18,6 +20,8 @@ window.addEventListener('DOMContentLoaded', () => {
     initHistory();
     initStatistics();
     initTabs();
+    initAutoRefresh();
+    initDiscordLookupHandler();
 
     // Server Id Search Input
     const serverIdSearch = document.querySelector('#server-id');
@@ -36,6 +40,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
                 fetchServer(value);
                 setId(value);
+                resetAutoRefreshTimer();
                 console.info('Fetching by input.');
             }
         });
@@ -56,7 +61,22 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             fetchServer(value);
             setId(value);
+            resetAutoRefreshTimer();
             console.info('Fetching by input.');
+        };
+    }
+
+    const refreshBtn = document.querySelector('#refresh-button');
+    if (refreshBtn) {
+        refreshBtn.onclick = () => {
+            const currentServerId = localStorage.getItem(STORAGE_KEYS.SERVER_ID);
+            if (currentServerId && isValidServerId(currentServerId)) {
+                fetchServer(currentServerId);
+                resetAutoRefreshTimer();
+                showNotification('Refreshed server data', 'info');
+            } else {
+                showNotification('Please enter a valid server ID first', 'warning');
+            }
         };
     }
 
@@ -105,3 +125,88 @@ const setId = (serverId) => {
         addToHistory(serverId, serverName, serverIcon);
     }
 };
+
+function initAutoRefresh() {
+    const toggleBtn = document.querySelector('#auto-refresh-toggle');
+    const statusText = document.querySelector('#auto-refresh-status');
+    const dot = document.querySelector('#auto-refresh-dot');
+
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener('click', () => {
+        const isActive = toggleBtn.classList.toggle('active');
+
+        if (isActive) {
+            if (statusText) {
+                statusText.textContent = 'ON';
+                statusText.style.color = 'var(--online-color)';
+            }
+            if (dot) {
+                dot.style.background = 'var(--online-color)';
+                dot.style.boxShadow = '0 0 8px var(--online-color)';
+            }
+            startAutoRefresh();
+        } else {
+            if (statusText) {
+                statusText.textContent = 'OFF';
+                statusText.style.color = 'inherit';
+            }
+            if (dot) {
+                dot.style.background = '#5c5c70';
+                dot.style.boxShadow = 'none';
+            }
+            stopAutoRefresh();
+        }
+    });
+}
+
+function startAutoRefresh() {
+    stopAutoRefresh();
+    timeLeft = REFRESH_RATE;
+    const timerDisplay = document.querySelector('#refresh-timer');
+    if (timerDisplay) timerDisplay.textContent = `${timeLeft}s`;
+
+    countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timerDisplay) timerDisplay.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            timeLeft = REFRESH_RATE;
+            const currentServerId = localStorage.getItem(STORAGE_KEYS.SERVER_ID);
+            if (currentServerId && isValidServerId(currentServerId)) {
+                fetchServer(currentServerId);
+                console.info('Auto-refresh executed.');
+            }
+        }
+    }, 1000);
+}
+
+function stopAutoRefresh() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    const timerDisplay = document.querySelector('#refresh-timer');
+    if (timerDisplay) timerDisplay.textContent = '--s';
+}
+
+function resetAutoRefreshTimer() {
+    if (countdownInterval) {
+        timeLeft = REFRESH_RATE;
+        const timerDisplay = document.querySelector('#refresh-timer');
+        if (timerDisplay) timerDisplay.textContent = `${timeLeft}s`;
+    }
+}
+
+function initDiscordLookupHandler() {
+    document.addEventListener('click', (event) => {
+        const discordBadge = event.target.closest('.id-badge.discord');
+        if (discordBadge) {
+            const rawText = discordBadge.dataset.discordId || discordBadge.textContent.trim();
+            const discordId = rawText.replace(/[^0-9]/g, '');
+            if (discordId) {
+                window.open(`https://discordlookup.com/user/${discordId}`, '_blank');
+            }
+        }
+    });
+}

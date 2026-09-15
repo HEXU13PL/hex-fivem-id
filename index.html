@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <script type="module" src="./checkBan.js"></script>
 
     <meta charset="UTF-8">
@@ -217,7 +216,7 @@
             text-decoration: none; color: #fff; transition: var(--transition);
         }
         .id-badge:hover { transform: translateY(-1px); filter: brightness(1.2); }
-        .id-badge.discord { background-color: rgba(88, 101, 242, 0.2); border: 1px solid rgba(88, 101, 242, 0.4); color: #8ea1ff; }
+        .id-badge.discord { background-color: rgba(88, 101, 242, 0.2); border: 1px solid rgba(88, 101, 242, 0.4); color: #8ea1ff; cursor: pointer; }
         .id-badge.steam { background-color: rgba(42, 71, 94, 0.3); border: 1px solid rgba(102, 192, 244, 0.3); color: #66c0f4; }
         .id-badge.license { background-color: rgba(243, 156, 18, 0.15); border: 1px solid rgba(243, 156, 18, 0.3); color: #f1c40f; }
 
@@ -288,6 +287,14 @@
                 <input type="text" id="server-id" placeholder="Server ID">
                 <button id="server-id-button" class="btn-primary">Connect</button>
                 <button id="refresh-button">Refresh</button>
+            </div>
+
+            <div class="input-group" style="align-items: center;">
+                <button id="auto-refresh-toggle" class="btn" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="auto-refresh-dot" style="width: 8px; height: 8px; background: #5c5c70; border-radius: 50%; transition: var(--transition);"></span>
+                    Auto-Refresh: <span id="auto-refresh-status">OFF</span>
+                </button>
+                <span id="refresh-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted);">--s</span>
             </div>
 
             <div class="input-group">
