@@ -3,3 +3,4 @@ export const BANNED_USERS = new Set([
     'USR-ZABLOKOWANE_ID_2',
 ]);
   // 666
+  // pozdro
