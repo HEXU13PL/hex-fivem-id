@@ -206,7 +206,7 @@
         .table-favorite:hover img { transform: scale(1.25); }
         .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; }
 
-        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; }
         .id-badge {
             display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
             border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
@@ -235,6 +235,7 @@
             cursor: pointer;
             font-family: inherit;
             outline: none;
+            white-space: nowrap;
         }
         .dl-lookup-btn:hover {
             background: #5865F2;
@@ -378,7 +379,7 @@
     <div id="loader" style="display: none;"><div class="spinner"></div></div>
     <div id="notification-container"></div>
 
-    <script type="module" src="js/index.js?v=102"></script>
+    <script type="module" src="js/index.js?v=103"></script>
 
     <script>
         let titleText = " HEX FiveM ID • ";
