@@ -13,7 +13,6 @@ const REFRESH_RATE = 30;
 let timeLeft = REFRESH_RATE;
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Initialize features
     initializeSearch();
     initTheme();
     initFavorites();
@@ -21,9 +20,8 @@ window.addEventListener('DOMContentLoaded', () => {
     initStatistics();
     initTabs();
     initAutoRefresh();
-    initDiscordLookupHandler();
+    observeDiscordBadges();
 
-    // Server Id Search Input
     const serverIdSearch = document.querySelector('#server-id');
     if (serverIdSearch) {
         serverIdSearch.addEventListener('keyup', (event) => {
@@ -198,15 +196,31 @@ function resetAutoRefreshTimer() {
     }
 }
 
-function initDiscordLookupHandler() {
-    document.addEventListener('click', (event) => {
-        const discordBadge = event.target.closest('.id-badge.discord');
-        if (discordBadge) {
-            const rawText = discordBadge.dataset.discordId || discordBadge.textContent.trim();
-            const discordId = rawText.replace(/[^0-9]/g, '');
-            if (discordId) {
-                window.open(`https://discordlookup.com/user/${discordId}`, '_blank');
+function observeDiscordBadges() {
+    const table = document.querySelector('#players-table');
+    if (!table) return;
+
+    const observer = new MutationObserver(() => {
+        const rows = table.querySelectorAll('tr');
+        rows.forEach(row => {
+            const match = row.innerHTML.match(/\b\d{17,19}\b/);
+            if (match) {
+                const discordId = match[0];
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    if (cell.textContent.includes(discordId) && !cell.querySelector('.dl-lookup-btn')) {
+                        const btn = document.createElement('a');
+                        btn.className = 'dl-lookup-btn';
+                        btn.href = `https://discordlookup.com/user/${discordId}`;
+                        btn.target = '_blank';
+                        btn.title = 'Sprawdź na DiscordLookup';
+                        btn.innerHTML = '🔍 Lookup';
+                        cell.appendChild(btn);
+                    }
+                });
             }
-        }
+        });
     });
+
+    observer.observe(table, { childList: true, subtree: true });
 }

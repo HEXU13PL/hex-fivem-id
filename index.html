@@ -216,9 +216,34 @@
             text-decoration: none; color: #fff; transition: var(--transition);
         }
         .id-badge:hover { transform: translateY(-1px); filter: brightness(1.2); }
-        .id-badge.discord { background-color: rgba(88, 101, 242, 0.2); border: 1px solid rgba(88, 101, 242, 0.4); color: #8ea1ff; cursor: pointer; }
+        .id-badge.discord { background-color: rgba(88, 101, 242, 0.2); border: 1px solid rgba(88, 101, 242, 0.4); color: #8ea1ff; }
         .id-badge.steam { background-color: rgba(42, 71, 94, 0.3); border: 1px solid rgba(102, 192, 244, 0.3); color: #66c0f4; }
         .id-badge.license { background-color: rgba(243, 156, 18, 0.15); border: 1px solid rgba(243, 156, 18, 0.3); color: #f1c40f; }
+
+        /* Dedykowany przycisk DiscordLookup */
+        .dl-lookup-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(88, 101, 242, 0.2);
+            border: 1px solid rgba(88, 101, 242, 0.4);
+            color: #8ea1ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 6px;
+            transition: var(--transition);
+            vertical-align: middle;
+        }
+        .dl-lookup-btn:hover {
+            background: #5865F2;
+            color: #ffffff;
+            border-color: #5865F2;
+            transform: translateY(-1px);
+            box-shadow: 0 0 8px rgba(88, 101, 242, 0.5);
+        }
 
         .status-dot-online {
             width: 8px; height: 8px; background-color: var(--online-color); border-radius: 50%; 
