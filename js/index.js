@@ -131,7 +131,6 @@ function initAutoRefresh() {
 
     if (!toggleBtn) return;
 
-    // Uruchomienie auto-refresh od razu po załadowaniu
     toggleBtn.classList.add('active');
     if (statusText) {
         statusText.textContent = 'ON';
@@ -221,12 +220,25 @@ function observeDiscordBadges() {
                 const cells = row.querySelectorAll('td');
                 cells.forEach(cell => {
                     if (cell.textContent.includes(discordId) && !cell.querySelector('.dl-lookup-btn')) {
-                        const btn = document.createElement('a');
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
                         btn.className = 'dl-lookup-btn';
-                        btn.href = `https://discordlookup.com/user/${discordId}`;
-                        btn.target = '_blank';
-                        btn.title = 'Sprawdź na DiscordLookup';
+                        btn.title = 'Skopiuj ID i otwórz discorder.tools';
                         btn.innerHTML = '🔍 Lookup';
+
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            navigator.clipboard.writeText(discordId).then(() => {
+                                showNotification(`Skopiowano ID: ${discordId}`, 'info');
+                            }).catch(() => {
+                                showNotification('Błąd kopiowania ID', 'error');
+                            });
+
+                            window.open('https://discorder.tools/discord-id-lookup/', '_blank');
+                        });
+
                         cell.appendChild(btn);
                     }
                 });
