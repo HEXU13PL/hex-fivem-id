@@ -131,6 +131,18 @@ function initAutoRefresh() {
 
     if (!toggleBtn) return;
 
+    // Uruchomienie auto-refresh od razu po załadowaniu
+    toggleBtn.classList.add('active');
+    if (statusText) {
+        statusText.textContent = 'ON';
+        statusText.style.color = 'var(--online-color)';
+    }
+    if (dot) {
+        dot.style.background = 'var(--online-color)';
+        dot.style.boxShadow = '0 0 8px var(--online-color)';
+    }
+    startAutoRefresh();
+
     toggleBtn.addEventListener('click', () => {
         const isActive = toggleBtn.classList.toggle('active');
 

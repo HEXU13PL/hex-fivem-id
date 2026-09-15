@@ -95,7 +95,6 @@
 
         .header-actions { display: flex; align-items: center; gap: 10px; }
 
-        /* Statystyki Hero KPI */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -180,7 +179,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeInUp 0.3s ease; }
 
-        /* Tabela */
         .table-container { 
             margin-top: 16px; background-color: var(--bg-secondary); 
             border: 1px solid var(--border-color); border-radius: var(--radius); 
@@ -208,7 +206,6 @@
         .table-favorite:hover img { transform: scale(1.25); }
         .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; }
 
-        /* Identyfikatory w tabeli jako kolorowe badge */
         .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .id-badge {
             display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
@@ -220,7 +217,6 @@
         .id-badge.steam { background-color: rgba(42, 71, 94, 0.3); border: 1px solid rgba(102, 192, 244, 0.3); color: #66c0f4; }
         .id-badge.license { background-color: rgba(243, 156, 18, 0.15); border: 1px solid rgba(243, 156, 18, 0.3); color: #f1c40f; }
 
-        /* Dedykowany przycisk DiscordLookup */
         .dl-lookup-btn {
             display: inline-flex;
             align-items: center;
@@ -315,11 +311,11 @@
             </div>
 
             <div class="input-group" style="align-items: center;">
-                <button id="auto-refresh-toggle" class="btn" style="display: flex; align-items: center; gap: 8px;">
-                    <span id="auto-refresh-dot" style="width: 8px; height: 8px; background: #5c5c70; border-radius: 50%; transition: var(--transition);"></span>
-                    Auto-Refresh: <span id="auto-refresh-status">OFF</span>
+                <button id="auto-refresh-toggle" class="btn active" style="display: flex; align-items: center; gap: 8px;">
+                    <span id="auto-refresh-dot" style="width: 8px; height: 8px; background: var(--online-color); box-shadow: 0 0 8px var(--online-color); border-radius: 50%; transition: var(--transition);"></span>
+                    Auto-Refresh: <span id="auto-refresh-status" style="color: var(--online-color);">ON</span>
                 </button>
-                <span id="refresh-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted);">--s</span>
+                <span id="refresh-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted);">30s</span>
             </div>
 
             <div class="input-group">
@@ -379,7 +375,7 @@
     <div id="loader" style="display: none;"><div class="spinner"></div></div>
     <div id="notification-container"></div>
 
-    <script type="module" src="js/index.js?v=100"></script>
+    <script type="module" src="js/index.js?v=101"></script>
 
     <script>
         let titleText = " HEX FiveM ID • ";
