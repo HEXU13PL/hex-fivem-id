@@ -2,17 +2,14 @@ export function initTheme() {
     const picker = document.querySelector('#accent-color-picker');
     if (!picker) return;
 
-    // Pobierz zapisany kolor lub użyj domyślnego czerwonego
     const savedColor = localStorage.getItem('theme_accent_color') || '#e50914';
     picker.value = savedColor;
     applyAccentColor(savedColor);
 
-    // Dynamiczna zmiana podczas przesuwania po palecie kolorów
     picker.addEventListener('input', (e) => {
         applyAccentColor(e.target.value);
     });
 
-    // Zapisz wybrany kolor po opuszczeniu okna wyboru
     picker.addEventListener('change', (e) => {
         localStorage.setItem('theme_accent_color', e.target.value);
     });
