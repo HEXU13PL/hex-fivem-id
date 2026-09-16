@@ -95,6 +95,52 @@
 
         .header-actions { display: flex; align-items: center; gap: 10px; }
 
+        .color-picker-wrapper {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .color-picker-wrapper:hover {
+            background-color: var(--bg-card-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        #accent-color-picker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+
+        #accent-color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        #accent-color-picker::-webkit-color-swatch {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px;
+        }
+
+        #accent-color-picker::-moz-color-swatch {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -286,7 +332,9 @@
                 <div id="favorites-menu" class="dropdown-menu"></div>
             </div>
 
-            <button id="theme-toggle" class="icon-button" title="Toggle Theme"><img src="img/moon.svg" alt="Theme"></button>
+            <div class="color-picker-wrapper" title="Zmień kolor akcentu">
+                <input type="color" id="accent-color-picker" value="#e50914">
+            </div>
         </div>
     </header>
 

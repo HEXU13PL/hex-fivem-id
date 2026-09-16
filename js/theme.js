@@ -1,59 +1,40 @@
-import { THEMES, STORAGE_KEYS } from './utils/constants.js';
+export function initTheme() {
+    const picker = document.querySelector('#accent-color-picker');
+    if (!picker) return;
 
-export const initTheme = () => {
-  const toggleButton = document.querySelector('#theme-toggle');
-  if (!toggleButton) return;
-  
-  const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME);
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initialTheme = savedTheme || (prefersDark ? THEMES.DARK : THEMES.LIGHT);
-  
-  applyTheme(initialTheme);
-  updateToggleButton(initialTheme);
-  
-  toggleButton.addEventListener('click', () => {
-    const currentTheme = document.body.classList.contains('light-theme') 
-      ? THEMES.LIGHT 
-      : THEMES.DARK;
-    
-    const newTheme = currentTheme === THEMES.LIGHT ? THEMES.DARK : THEMES.LIGHT;
-    
-    applyTheme(newTheme);
-    updateToggleButton(newTheme);
-    
-    localStorage.setItem(STORAGE_KEYS.THEME, newTheme);
-  });
-};
+    // Pobierz zapisany kolor lub użyj domyślnego czerwonego
+    const savedColor = localStorage.getItem('theme_accent_color') || '#e50914';
+    picker.value = savedColor;
+    applyAccentColor(savedColor);
 
-const applyTheme = (theme) => {
-  if (theme === THEMES.LIGHT) {
-    document.body.classList.add('light-theme');
-  } else {
-    document.body.classList.remove('light-theme');
-  }
-};
+    // Dynamiczna zmiana podczas przesuwania po palecie kolorów
+    picker.addEventListener('input', (e) => {
+        applyAccentColor(e.target.value);
+    });
 
-const updateToggleButton = (theme) => {
-  const toggleButton = document.querySelector('#theme-toggle');
-  if (!toggleButton) return;
+    // Zapisz wybrany kolor po opuszczeniu okna wyboru
+    picker.addEventListener('change', (e) => {
+        localStorage.setItem('theme_accent_color', e.target.value);
+    });
+}
 
-  // Remove all children
-  while (toggleButton.firstChild) {
-    toggleButton.removeChild(toggleButton.firstChild);
-  }
+function applyAccentColor(hexColor) {
+    const root = document.documentElement;
+    const rgbaGlow = hexToRgba(hexColor, 0.35);
+    const borderGlow = hexToRgba(hexColor, 0.4);
 
-  const iconPath = theme === THEMES.LIGHT 
-    ? 'img/moon.svg'
-    : 'img/sun.svg';
-    
-  const altText = theme === THEMES.LIGHT
-    ? 'Switch to dark mode'
-    : 'Switch to light mode';
+    root.style.setProperty('--accent-red', hexColor);
+    root.style.setProperty('--accent-red-hover', hexColor);
+    root.style.setProperty('--accent-red-glow', rgbaGlow);
+    root.style.setProperty('--border-glow', borderGlow);
 
-  const img = document.createElement('img');
-  img.src = iconPath;
-  img.alt = altText;
-  img.title = altText;
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute('content', hexColor);
+}
 
-  toggleButton.appendChild(img);
-};
+function hexToRgba(hex, alpha) {
+    let c = hex.replace('#', '');
+    if (c.length === 3) c = c.split('').map(x => x + x).join('');
+    const num = parseInt(c, 16);
+    return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+}
