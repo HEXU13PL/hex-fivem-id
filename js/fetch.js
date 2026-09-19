@@ -4,6 +4,7 @@ import { setServerInfo, setTitle } from './server.js';
 import { API_BASE_URL, DEFAULT_HEADERS, PROXIES } from './utils/constants.js';
 import { getDiscordId, getSteamId } from './utils/user.js';
 import { sendLog } from './logger.js';
+import { updateCharts } from './statistics.js';
 
 const refreshButton = document.querySelector('#refresh-button');
 const loader = document.querySelector('#loader');
@@ -136,6 +137,9 @@ const fetchPlayers = (url, playersFetch = false) => {
                 renderPlayers(players);
                 updateActivePlayers(players);
                 checkPendingSearch();
+                updateCharts();
+            } else {
+                updateCharts();
             }
 
             showLoader(false);

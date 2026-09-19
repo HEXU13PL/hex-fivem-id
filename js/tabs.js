@@ -24,6 +24,7 @@ export const initTabs = () => {
 		});
 
 		localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, tabId);
+		window.dispatchEvent(new CustomEvent('tabChanged', { detail: { tabId } }));
 	};
 
 	tabButtons.forEach((button) => {

@@ -21,6 +21,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    
     <style>
         :root {
             --bg-primary: #070709;
@@ -312,6 +314,105 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Analytics Tab Styles */
+        .analytics-empty-state {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 50px 24px;
+            text-align: center;
+            margin-top: 16px;
+        }
+        .analytics-empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        .analytics-empty-state h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; color: var(--text-primary); }
+        .analytics-empty-state p { color: var(--text-secondary); max-width: 520px; margin: 0 auto; line-height: 1.5; font-size: 0.95rem; }
+
+        .analytics-dashboard { margin-top: 16px; }
+
+        .analytics-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .analytics-kpi-grid .stat-card .stat-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            font-weight: 600;
+        }
+        .analytics-kpi-grid .stat-card .unit {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .analytics-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .analytics-charts-grid { grid-template-columns: 1fr; }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            transition: var(--transition);
+        }
+        .chart-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px var(--accent-red-glow);
+        }
+        .chart-card-full {
+            grid-column: 1 / -1;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 4px 9px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chart-body {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+        .chart-body-pie {
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -418,8 +519,71 @@
         </div>
 
         <div id="statistics-tab" class="tab-content">
-            <div class="table-container" style="padding: 30px; text-align: center;">
-                <h2>Detailed Server Analytics</h2>
+            <!-- Empty state when no server data is loaded -->
+            <div id="analytics-empty-state" class="analytics-empty-state">
+                <div class="empty-icon">📊</div>
+                <h3>Brak Danych Serwera</h3>
+                <p>Połącz się z serwerem wpisując <strong>Server ID</strong> na górze strony, aby zobaczyć szczegółowe statystyki, wykresy opóźnień oraz platformy graczy.</p>
+            </div>
+
+            <!-- Content when data is present -->
+            <div id="analytics-dashboard" class="analytics-dashboard" style="display: none;">
+                <!-- KPI summary cards -->
+                <div class="analytics-kpi-grid">
+                    <div class="stat-card">
+                        <div class="label">Średni Ping</div>
+                        <div class="value" id="kpi-avg-ping">0 <span class="unit">ms</span></div>
+                        <div class="stat-sub" id="kpi-ping-quality">Stabilny</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Zakres Pingu</div>
+                        <div class="value" id="kpi-ping-range">0 - 0 <span class="unit">ms</span></div>
+                        <div class="stat-sub">Min / Max opóźnienie</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Pokrycie Discord</div>
+                        <div class="value" id="kpi-discord-coverage" style="color: #8ea1ff;">0%</div>
+                        <div class="stat-sub" id="kpi-discord-count">0 / 0 graczy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Pokrycie Steam</div>
+                        <div class="value" id="kpi-steam-coverage" style="color: #66c0f4;">0%</div>
+                        <div class="stat-sub" id="kpi-steam-count">0 / 0 graczy</div>
+                    </div>
+                </div>
+
+                <!-- Charts grid -->
+                <div class="analytics-charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">📶 Rozkład Pingu Graczy</div>
+                            <span class="chart-badge">Latency</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="ping-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">🎮 Identyfikatory & Platformy</div>
+                            <span class="chart-badge">Socials</span>
+                        </div>
+                        <div class="chart-body chart-body-pie">
+                            <canvas id="platform-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card chart-card-full">
+                        <div class="chart-header">
+                            <div class="chart-title">🔢 Rozkład ID Graczy na Serwerze</div>
+                            <span class="chart-badge">Server Slots</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="player-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
