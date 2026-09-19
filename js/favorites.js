@@ -207,6 +207,14 @@ const renderFavoritesMenu = () => {
 		button.addEventListener('click', () => {
 			const serverId = button.getAttribute('data-server-id');
 			if (serverId) {
+				const input = document.querySelector('#server-id');
+				if (input) input.value = serverId;
+				const statId = document.querySelector('#stat-id');
+				if (statId) statId.textContent = serverId;
+				localStorage.setItem(STORAGE_KEYS.SERVER_ID, serverId);
+				const url = new URL(window.location.href);
+				url.searchParams.set('serverId', serverId);
+				window.history.replaceState(null, null, url);
 				fetchServer(serverId);
 				favoritesMenu.classList.remove('show');
 			}

@@ -1,6 +1,6 @@
 import { getPlayerKey, isPlayerFavorite, updateActivePlayers } from './favorites.js';
 import { checkPendingSearch, isSearching, searchPlayers } from './search.js';
-import { setServerInfo, setTitle } from './server.js';
+import { setServerInfo, setTitle, setServerStatus, updatePlayerCount } from './server.js';
 import { API_BASE_URL, DEFAULT_HEADERS, PROXIES } from './utils/constants.js';
 import { getDiscordId, getSteamId } from './utils/user.js';
 import { sendLog } from './logger.js';
@@ -85,6 +85,9 @@ export const fetchServer = (serverId, isRefresh = false) => {
         setTitle('Loading server data from FiveM API...');
         showLoader(true);
 
+        const statId = document.querySelector('#stat-id');
+        if (statId) statId.textContent = serverId;
+
         if (refreshButton) {
             refreshButton.onclick = () => fetchServer(serverId, true);
         }
@@ -110,6 +113,7 @@ export const fetchServer = (serverId, isRefresh = false) => {
             .catch((error) => {
                 console.error(error);
                 setTitle('Error loading server data');
+                setServerStatus('Offline', false);
                 if (error.message && (error.message.includes('404') || error.message.toLowerCase().includes('not found'))) {
                     showNotification('Server not found. Please enter a valid server ID.', 'error');
                 } else {
@@ -131,6 +135,8 @@ const fetchPlayers = (url, playersFetch = false) => {
         .then((json) => {
             let players = playersFetch ? json : json.Data.players;
             players = formatPlayers(players);
+
+            updatePlayerCount(players.length);
 
             if (!arraysEqual(currentPlayers, players)) {
                 currentPlayers = players;

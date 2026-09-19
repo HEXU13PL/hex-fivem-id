@@ -83,6 +83,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const rawServerId = url.searchParams.get('serverId');
         const serverId = extractServerId(rawServerId);
         if (serverId && isValidServerId(serverId)) {
+            if (serverIdSearch) serverIdSearch.value = serverId;
             fetchServer(serverId);
             setId(serverId);
             console.info('Fetching by URL.');
@@ -96,6 +97,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (storageServerId) {
         const serverId = extractServerId(storageServerId);
         if (isValidServerId(serverId)) {
+            if (serverIdSearch) serverIdSearch.value = serverId;
             fetchServer(serverId);
             setId(serverId);
             console.info('Fetching by localStorage.');
@@ -108,11 +110,21 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-const setId = (serverId) => {
+export const setId = (serverId) => {
     const url = new URL(window.location.href);
     url.searchParams.set('serverId', serverId);
     window.history.replaceState(null, null, url);
     localStorage.setItem(STORAGE_KEYS.SERVER_ID, serverId);
+    
+    const serverIdSearch = document.querySelector('#server-id');
+    if (serverIdSearch) {
+        serverIdSearch.value = serverId;
+    }
+
+    const statId = document.querySelector('#stat-id');
+    if (statId) {
+        statId.textContent = serverId;
+    }
     
     const serverNameEl = document.querySelector('#server-name');
     const serverIconEl = document.querySelector('#server-icon');
