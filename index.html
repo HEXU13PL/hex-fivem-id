@@ -430,11 +430,45 @@
     <script type="module" src="js/index.js?v=103"></script>
 
     <script>
+        // Animacja tytułu karty w przeglądarce
         let titleText = " HEX FiveM ID • ";
         setInterval(() => {
             titleText = titleText.substring(1) + titleText.charAt(0);
             document.title = titleText;
         }, 300);
+
+        // Zabezpieczenie przed inspektorem / Zbadaj element
+        document.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'F12' || event.keyCode === 123) {
+                event.preventDefault();
+                return false;
+            }
+
+            if (event.ctrlKey && event.shiftKey) {
+                if (['I', 'i', 'J', 'j', 'C', 'c'].includes(event.key)) {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            if (event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        setInterval(() => {
+            const startTime = performance.now();
+            debugger;
+            const endTime = performance.now();
+            if (endTime - startTime > 100) {
+                document.body.innerHTML = 'Narzędzia deweloperskie są zablokowane na tej stronie.';
+            }
+        }, 1000);
     </script>
 </body>
 </html>
