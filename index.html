@@ -462,22 +462,21 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             line-height: 1;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: var(--transition);
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .modal-close-btn:hover {
             background: var(--accent-red);
             color: #fff;
             border-color: var(--accent-red);
-            transform: rotate(90deg);
         }
 
         .modal-header {
@@ -676,48 +675,6 @@
             border-color: #f1c40f;
             color: #f1c40f;
             background: rgba(241, 196, 15, 0.1);
-        }
-
-        /* Direct Identifiers Badges in Table */
-        .badge-steam-hex {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(42, 71, 94, 0.4);
-            border: 1px solid rgba(102, 192, 244, 0.35);
-            color: #66c0f4;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .badge-steam-hex:hover {
-            background: #2a475e;
-            color: #fff;
-            transform: translateY(-1px);
-        }
-        .badge-license {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(243, 156, 18, 0.15);
-            border: 1px solid rgba(243, 156, 18, 0.35);
-            color: #f1c40f;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .badge-license:hover {
-            background: #f39c12;
-            color: #000;
-            transform: translateY(-1px);
         }
     </style>
 </head>

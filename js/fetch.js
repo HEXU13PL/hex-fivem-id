@@ -317,21 +317,7 @@ export const renderPlayers = (players, search = false) => {
         ping.style.fontFamily = "'JetBrains Mono', monospace";
         ping.style.fontWeight = '700';
 
-        // 1. Steam HEX badge
-        if (player.socials && player.socials.steamHex) {
-            const hexBadge = document.createElement('span');
-            hexBadge.className = 'badge-steam-hex';
-            hexBadge.title = `Kopiuj ${player.socials.steamHex}`;
-            hexBadge.textContent = 'HEX';
-            hexBadge.onclick = (e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(player.socials.steamHex);
-                showNotification(`Skopiowano: ${player.socials.steamHex}`, 'success');
-            };
-            socials.appendChild(hexBadge);
-        }
-
-        // 2. Steam Profile Link
+        // 1. Steam Profile Link
         if (player.socials && player.socials.steam) {
             const link = document.createElement('a');
             link.href = STEAM_LINK.replace('%id%', player.socials.steam);
@@ -379,21 +365,7 @@ export const renderPlayers = (players, search = false) => {
             socials.appendChild(lookupBtn);
         }
 
-        // 4. Rockstar License badge
-        if (player.socials && player.socials.license) {
-            const licBadge = document.createElement('span');
-            licBadge.className = 'badge-license';
-            licBadge.title = `Kopiuj ${player.socials.license}`;
-            licBadge.textContent = 'LIC';
-            licBadge.onclick = (e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(player.socials.license);
-                showNotification('Skopiowano Rockstar License!', 'success');
-            };
-            socials.appendChild(licBadge);
-        }
-
-        // 5. Profil button
+        // 4. Profil button
         const profileBtn = document.createElement('button');
         profileBtn.type = 'button';
         profileBtn.className = 'dl-lookup-btn';

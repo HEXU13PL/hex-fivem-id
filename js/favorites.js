@@ -330,17 +330,6 @@ export const renderFavoritePlayers = () => {
 				window.open('https://discorder.tools/discord-id-lookup/', '_blank');
 			};
 			socials.appendChild(lookupBtn);
-		} else if (player.key.startsWith('steam:')) {
-			const hexBadge = document.createElement('span');
-			hexBadge.className = 'badge-steam-hex';
-			hexBadge.title = `Kopiuj ${player.key}`;
-			hexBadge.textContent = 'HEX';
-			hexBadge.onclick = (e) => {
-				e.stopPropagation();
-				navigator.clipboard.writeText(player.key);
-				showNotification(`Skopiowano: ${player.key}`, 'success');
-			};
-			socials.appendChild(hexBadge);
 		}
 
 		const profileBtn = document.createElement('button');
