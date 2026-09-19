@@ -7,6 +7,7 @@ import { initStatistics } from './statistics.js';
 import { showNotification } from './notifications.js';
 import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
+import { initPlayerModal } from './playerModal.js';
 
 let countdownInterval = null;
 const REFRESH_RATE = 30;
@@ -20,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initStatistics();
     initTabs();
     initAutoRefresh();
-    observeDiscordBadges();
+    initPlayerModal();
 
     const serverIdSearch = document.querySelector('#server-id');
     if (serverIdSearch) {
@@ -217,66 +218,4 @@ function resetAutoRefreshTimer() {
         const timerDisplay = document.querySelector('#refresh-timer');
         if (timerDisplay) timerDisplay.textContent = `${timeLeft}s`;
     }
-}
-
-function observeDiscordBadges() {
-    const tables = document.querySelectorAll('#players-table, #favorites-table');
-
-    tables.forEach(table => {
-        if (!table) return;
-
-        const processTable = () => {
-            const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                // Pomijamy nagłówki i komunikaty w stopce
-                if (row.id === 'table-header' || row.id === 'favorites-table-header' || row.classList.contains('table-footer')) return;
-
-                // Wyszukujemy identyfikator Discord (17-19 cyfr, pomijając Steam ID 76561...)
-                const match = row.textContent.match(/\b(?!76561)\d{17,19}\b/);
-                if (!match) return;
-
-                const discordId = match[0];
-
-                // Docelowa komórka to ZAWSZE kolumna Socials (.table-socials lub 5. komórka wiersza)
-                const targetCell = row.querySelector('.table-socials') || row.cells[4];
-                if (!targetCell || targetCell.querySelector('.dl-lookup-btn')) return;
-
-                const discordBadge = targetCell.querySelector('.id-badge.discord');
-                const btn = createLookupBtn(discordId);
-
-                if (discordBadge) {
-                    discordBadge.after(btn);
-                } else {
-                    targetCell.appendChild(btn);
-                }
-            });
-        };
-
-        const observer = new MutationObserver(processTable);
-        observer.observe(table, { childList: true, subtree: true });
-        processTable();
-    });
-}
-
-function createLookupBtn(discordId) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'dl-lookup-btn';
-    btn.title = 'Skopiuj Discord ID i otwórz discorder.tools';
-    btn.innerHTML = '🔍 Lookup';
-
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        navigator.clipboard.writeText(discordId).then(() => {
-            showNotification(`Skopiowano ID: ${discordId}`, 'info');
-        }).catch(() => {
-            showNotification('Błąd kopiowania ID', 'error');
-        });
-
-        window.open('https://discorder.tools/discord-id-lookup/', '_blank');
-    });
-
-    return btn;
 }

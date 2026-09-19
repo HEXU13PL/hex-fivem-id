@@ -5,6 +5,7 @@ import { API_BASE_URL, DEFAULT_HEADERS, PROXIES } from './utils/constants.js';
 import { getDiscordId, getSteamId } from './utils/user.js';
 import { sendLog } from './logger.js';
 import { updateCharts } from './statistics.js';
+import { openPlayerModal } from './playerModal.js';
 
 const refreshButton = document.querySelector('#refresh-button');
 const loader = document.querySelector('#loader');
@@ -169,19 +170,27 @@ const formatPlayers = (players) => {
     const formattedPlayers = [];
     players.forEach((player) => {
         const socials = {};
+        const identifiers = player.identifiers || [];
 
-        if (player.identifiers) {
-            const steamIdentifier = getSteamId(player.identifiers);
-            if (steamIdentifier) socials.steam = steamIdentifier;
+        const steamIdentifier = getSteamId(identifiers);
+        if (steamIdentifier) socials.steam = steamIdentifier;
 
-            const discordIdentifier = getDiscordId(player.identifiers);
-            if (discordIdentifier) socials.discord = discordIdentifier;
-        }
+        const discordIdentifier = getDiscordId(identifiers);
+        if (discordIdentifier) socials.discord = discordIdentifier;
+
+        const steamHex = identifiers.find((id) => typeof id === 'string' && id.startsWith('steam:')) || null;
+        const license = identifiers.find((id) => typeof id === 'string' && id.startsWith('license:')) || null;
+        const license2 = identifiers.find((id) => typeof id === 'string' && id.startsWith('license2:')) || null;
+
+        if (steamHex) socials.steamHex = steamHex;
+        if (license) socials.license = license;
+        if (license2) socials.license2 = license2;
 
         formattedPlayers.push({
             name: player.name,
             id: player.id,
             socials,
+            identifiers,
             ping: player.ping,
         });
     });
@@ -206,6 +215,15 @@ export const renderPlayers = (players, search = false) => {
         const tr = document.createElement('tr');
         const playerKey = getPlayerKey(player);
         tr.setAttribute('data-player-key', playerKey);
+        tr.style.cursor = 'pointer';
+        tr.title = 'Kliknij, aby otworzyć szczegóły gracza';
+
+        tr.addEventListener('click', (e) => {
+            if (e.target.closest('.table-favorite') || e.target.closest('a') || e.target.closest('button')) {
+                return;
+            }
+            openPlayerModal(player);
+        });
 
         const no = document.createElement('td');
         const star = document.createElement('td');
@@ -285,28 +303,108 @@ export const renderPlayers = (players, search = false) => {
                 .catch(() => {});
         }
 
-        ping.textContent = `${player.ping}ms`;
+        const pingVal = Number(player.ping) || 0;
+        ping.textContent = `${pingVal}ms`;
+        if (pingVal < 50) {
+            ping.style.color = '#00e676';
+        } else if (pingVal < 100) {
+            ping.style.color = '#66c0f4';
+        } else if (pingVal < 150) {
+            ping.style.color = '#f1c40f';
+        } else {
+            ping.style.color = '#ff1e27';
+        }
+        ping.style.fontFamily = "'JetBrains Mono', monospace";
+        ping.style.fontWeight = '700';
 
-        if (player.socials.steam) {
+        // 1. Steam HEX badge
+        if (player.socials && player.socials.steamHex) {
+            const hexBadge = document.createElement('span');
+            hexBadge.className = 'badge-steam-hex';
+            hexBadge.title = `Kopiuj ${player.socials.steamHex}`;
+            hexBadge.textContent = 'HEX';
+            hexBadge.onclick = (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(player.socials.steamHex);
+                showNotification(`Skopiowano: ${player.socials.steamHex}`, 'success');
+            };
+            socials.appendChild(hexBadge);
+        }
+
+        // 2. Steam Profile Link
+        if (player.socials && player.socials.steam) {
             const link = document.createElement('a');
             link.href = STEAM_LINK.replace('%id%', player.socials.steam);
             link.target = '_blank';
+            link.title = 'Otwórz profil Steam';
             const steamImg = document.createElement('img');
             steamImg.src = 'img/steam.svg';
             steamImg.alt = 'Steam';
+            steamImg.style.width = '18px';
+            steamImg.style.height = '18px';
+            steamImg.style.verticalAlign = 'middle';
             link.appendChild(steamImg);
             socials.appendChild(link);
         }
-        if (player.socials.discord) {
+
+        // 3. Discord Link + Discorder Lookup Button
+        if (player.socials && player.socials.discord) {
+            const discordId = player.socials.discord;
             const link = document.createElement('a');
-            link.href = DISCORD_LINK.replace('%id%', player.socials.discord);
+            link.href = DISCORD_LINK.replace('%id%', discordId);
             link.target = '_blank';
+            link.title = 'Otwórz profil Discord';
             const discordImg = document.createElement('img');
             discordImg.src = 'img/discord.svg';
             discordImg.alt = 'Discord';
+            discordImg.style.width = '18px';
+            discordImg.style.height = '18px';
+            discordImg.style.verticalAlign = 'middle';
             link.appendChild(discordImg);
             socials.appendChild(link);
+
+            const lookupBtn = document.createElement('button');
+            lookupBtn.type = 'button';
+            lookupBtn.className = 'dl-lookup-btn';
+            lookupBtn.title = 'Skopiuj Discord ID i otwórz discorder.tools';
+            lookupBtn.innerHTML = '🔍 Lookup';
+            lookupBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigator.clipboard.writeText(discordId).then(() => {
+                    showNotification(`Skopiowano ID: ${discordId}`, 'info');
+                });
+                window.open('https://discorder.tools/discord-id-lookup/', '_blank');
+            };
+            socials.appendChild(lookupBtn);
         }
+
+        // 4. Rockstar License badge
+        if (player.socials && player.socials.license) {
+            const licBadge = document.createElement('span');
+            licBadge.className = 'badge-license';
+            licBadge.title = `Kopiuj ${player.socials.license}`;
+            licBadge.textContent = 'LIC';
+            licBadge.onclick = (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(player.socials.license);
+                showNotification('Skopiowano Rockstar License!', 'success');
+            };
+            socials.appendChild(licBadge);
+        }
+
+        // 5. Profil button
+        const profileBtn = document.createElement('button');
+        profileBtn.type = 'button';
+        profileBtn.className = 'dl-lookup-btn';
+        profileBtn.style.cssText = 'background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: #fff;';
+        profileBtn.title = 'Zobacz pełne identyfikatory i szczegóły gracza';
+        profileBtn.innerHTML = '👁️ Profil';
+        profileBtn.onclick = (e) => {
+            e.stopPropagation();
+            openPlayerModal(player);
+        };
+        socials.appendChild(profileBtn);
 
         tr.appendChild(no);
         tr.appendChild(star);

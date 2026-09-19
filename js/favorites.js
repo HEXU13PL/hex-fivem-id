@@ -1,7 +1,8 @@
 import { STORAGE_KEYS } from './utils/constants.js';
-import { fetchServer } from './fetch.js';
+import { fetchServer, getPlayers } from './fetch.js';
 import { showNotification } from './notifications.js';
 import { sendLog } from './logger.js';
+import { openPlayerModal } from './playerModal.js';
 
 let favorites = [];
 let activePlayerKeys = new Set();
@@ -261,6 +262,26 @@ export const renderFavoritePlayers = () => {
 			tr.classList.add('player-offline');
 		}
 		tr.setAttribute('data-player-key', player.key);
+		tr.style.cursor = 'pointer';
+		tr.title = 'Kliknij, aby otworzyć szczegóły gracza';
+
+		tr.addEventListener('click', (e) => {
+			if (e.target.closest('.table-favorite') || e.target.closest('a') || e.target.closest('button')) {
+				return;
+			}
+			const allPlayers = (typeof getPlayers === 'function' ? getPlayers() : []) || [];
+			const matched = allPlayers.find((p) => getPlayerKey(p) === player.key);
+			if (matched) {
+				openPlayerModal(matched);
+			} else {
+				openPlayerModal({
+					name: player.name,
+					id: isOnline ? 'Online' : 'Offline',
+					ping: '--',
+					identifiers: [player.key],
+				});
+			}
+		});
 
 		const no = document.createElement('td');
 		const star = document.createElement('td');
@@ -292,6 +313,58 @@ export const renderFavoritePlayers = () => {
 		statusImg.title = isOnline ? 'Online' : 'Offline';
 		ping.appendChild(statusImg);
 		ping.appendChild(ping_text);
+
+		if (player.key.startsWith('discord:')) {
+			const discordId = player.key.replace('discord:', '');
+			const lookupBtn = document.createElement('button');
+			lookupBtn.type = 'button';
+			lookupBtn.className = 'dl-lookup-btn';
+			lookupBtn.title = 'Skopiuj Discord ID i otwórz discorder.tools';
+			lookupBtn.innerHTML = '🔍 Lookup';
+			lookupBtn.onclick = (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				navigator.clipboard.writeText(discordId).then(() => {
+					showNotification(`Skopiowano ID: ${discordId}`, 'info');
+				});
+				window.open('https://discorder.tools/discord-id-lookup/', '_blank');
+			};
+			socials.appendChild(lookupBtn);
+		} else if (player.key.startsWith('steam:')) {
+			const hexBadge = document.createElement('span');
+			hexBadge.className = 'badge-steam-hex';
+			hexBadge.title = `Kopiuj ${player.key}`;
+			hexBadge.textContent = 'HEX';
+			hexBadge.onclick = (e) => {
+				e.stopPropagation();
+				navigator.clipboard.writeText(player.key);
+				showNotification(`Skopiowano: ${player.key}`, 'success');
+			};
+			socials.appendChild(hexBadge);
+		}
+
+		const profileBtn = document.createElement('button');
+		profileBtn.type = 'button';
+		profileBtn.className = 'dl-lookup-btn';
+		profileBtn.style.cssText = 'background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: #fff;';
+		profileBtn.title = 'Zobacz szczegóły gracza';
+		profileBtn.innerHTML = '👁️ Profil';
+		profileBtn.onclick = (e) => {
+			e.stopPropagation();
+			const allPlayers = (typeof getPlayers === 'function' ? getPlayers() : []) || [];
+			const matched = allPlayers.find((p) => getPlayerKey(p) === player.key);
+			if (matched) {
+				openPlayerModal(matched);
+			} else {
+				openPlayerModal({
+					name: player.name,
+					id: isOnline ? 'Online' : 'Offline',
+					ping: '--',
+					identifiers: [player.key],
+				});
+			}
+		};
+		socials.appendChild(profileBtn);
 
 		tr.appendChild(no);
 		tr.appendChild(star);
