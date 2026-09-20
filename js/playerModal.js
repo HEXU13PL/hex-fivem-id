@@ -1,7 +1,10 @@
 import { showNotification } from './notifications.js';
 import { isPlayerFavorite, togglePlayerFavorite, getPlayerKey } from './favorites.js';
 import { hexToDecimal } from './utils/user.js';
+import { lookupDiscordUser, getDefaultDiscordAvatar } from './utils/discord.js';
 import { sendLog } from './logger.js';
+
+let modalLookupToken = 0;
 
 let modalEl = null;
 let currentModalPlayer = null;
@@ -74,38 +77,43 @@ export const openPlayerModal = (player) => {
         }
     }
 
-    // Domyślny awatar
+    const discordTagEl = document.getElementById('modal-discord-tag');
+    const lookupToken = ++modalLookupToken;
+
     if (avatarEl) {
         avatarEl.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+    }
+    if (discordTagEl) {
+        discordTagEl.style.display = 'none';
+        discordTagEl.textContent = '';
     }
 
     // 2. Parsowanie identyfikatorów
     const identifiers = player.identifiers || [];
     const ids = parseIdentifiers(identifiers);
 
-    // Awatar z Lanyard (jeśli jest Discord ID)
     if (ids.discord) {
-        fetch(`https://api.lanyard.rest/v1/users/${ids.discord}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.data?.discord_user) {
-                    const user = data.data.discord_user;
-                    if (avatarEl) {
-                        avatarEl.src = user.avatar
-                            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
-                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-                    }
-                    const discordTagEl = document.getElementById('modal-discord-tag');
-                    if (discordTagEl) {
-                        discordTagEl.textContent = `@${user.username}`;
-                        discordTagEl.style.display = 'inline-block';
-                    }
-                }
-            })
-            .catch(() => {});
-    } else {
-        const discordTagEl = document.getElementById('modal-discord-tag');
-        if (discordTagEl) discordTagEl.style.display = 'none';
+        if (avatarEl) avatarEl.src = getDefaultDiscordAvatar(ids.discord);
+        if (discordTagEl) {
+            discordTagEl.textContent = 'Ładowanie Discord...';
+            discordTagEl.style.display = 'inline-block';
+        }
+
+        lookupDiscordUser(ids.discord).then((user) => {
+            if (lookupToken !== modalLookupToken) return;
+            if (!user) {
+                if (discordTagEl) discordTagEl.style.display = 'none';
+                return;
+            }
+            if (avatarEl) avatarEl.src = user.avatarUrl;
+            if (discordTagEl) {
+                discordTagEl.textContent = user.globalName
+                    ? `${user.displayName} · @${user.username}`
+                    : `@${user.username}`;
+                discordTagEl.style.display = 'inline-block';
+                discordTagEl.title = `Discord ID: ${ids.discord}`;
+            }
+        });
     }
 
     // 3. Renderowanie listy identyfikatorów

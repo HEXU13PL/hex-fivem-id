@@ -3,6 +3,7 @@ import { checkPendingSearch, isSearching, searchPlayers } from './search.js';
 import { setServerInfo, setTitle, setServerStatus, updatePlayerCount } from './server.js';
 import { API_BASE_URL, DEFAULT_HEADERS, PROXIES } from './utils/constants.js';
 import { getDiscordId, getSteamId } from './utils/user.js';
+import { lookupDiscordUser, getDefaultDiscordAvatar } from './utils/discord.js';
 import { sendLog } from './logger.js';
 import { updateCharts } from './statistics.js';
 import { openPlayerModal } from './playerModal.js';
@@ -262,10 +263,16 @@ export const renderPlayers = (players, search = false) => {
             discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
             discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s;';
 
-            discordContainer.innerHTML = `
-                <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Discord" style="width: 14px; height: 14px; border-radius: 50%;">
-                <span>${discordId}</span>
-            `;
+            const avatarImg = document.createElement('img');
+            avatarImg.src = getDefaultDiscordAvatar(discordId);
+            avatarImg.alt = 'Discord';
+            avatarImg.style.cssText = 'width: 18px; height: 18px; border-radius: 50%; object-fit: cover;';
+
+            const nickSpan = document.createElement('span');
+            nickSpan.textContent = discordId;
+
+            discordContainer.appendChild(avatarImg);
+            discordContainer.appendChild(nickSpan);
 
             discordContainer.onmouseover = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.3)'; };
             discordContainer.onmouseout = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.15)'; };
@@ -287,22 +294,12 @@ export const renderPlayers = (players, search = false) => {
 
             name.appendChild(discordContainer);
 
-            fetch(`https://api.lanyard.rest/v1/users/${discordId}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.success && data.data && data.data.discord_user) {
-                        const user = data.data.discord_user;
-                        const avatarUrl = user.avatar 
-                            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=32`
-                            : 'https://cdn.discordapp.com/embed/avatars/0.png';
-
-                        discordContainer.innerHTML = `
-                            <img src="${avatarUrl}" alt="Avatar" style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover;">
-                            <span>@${user.username}</span>
-                        `;
-                    }
-                })
-                .catch(() => {});
+            lookupDiscordUser(discordId).then((user) => {
+                if (!user || !discordContainer.isConnected) return;
+                avatarImg.src = user.avatarUrl;
+                nickSpan.textContent = user.displayName;
+                discordContainer.title = `Discord: ${user.displayName}${user.username ? ` (@${user.username})` : ''} — kliknij, aby skopiować ${mentionFormat}`;
+            });
         }
 
         const pingVal = Number(player.ping) || 0;
