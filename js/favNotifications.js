@@ -4,6 +4,7 @@ import { showNotification } from './notifications.js';
 
 let previousOnlineKeys = null; // null = first run, skip notifications
 let notificationsEnabled = true;
+let browserNotificationsEnabled = false;
 
 /**
  * Initialize favourite notifications system.
@@ -15,12 +16,25 @@ export const initFavNotifications = () => {
         notificationsEnabled = saved === 'true';
     }
 
+    const savedBrowserNotifications = localStorage.getItem(STORAGE_KEYS.BROWSER_NOTIFICATIONS);
+    browserNotificationsEnabled = savedBrowserNotifications === 'true'
+        && 'Notification' in window
+        && Notification.permission === 'granted';
+
     const toggleBtn = document.getElementById('fav-notif-toggle');
     if (toggleBtn) {
         updateToggleButton(toggleBtn);
-        toggleBtn.addEventListener('click', () => {
+        toggleBtn.addEventListener('click', async () => {
             notificationsEnabled = !notificationsEnabled;
             localStorage.setItem(STORAGE_KEYS.FAV_NOTIFICATIONS, String(notificationsEnabled));
+
+            if (notificationsEnabled) {
+                await enableBrowserNotifications();
+            } else {
+                browserNotificationsEnabled = false;
+                localStorage.setItem(STORAGE_KEYS.BROWSER_NOTIFICATIONS, 'false');
+            }
+
             updateToggleButton(toggleBtn);
             showNotification(
                 notificationsEnabled
@@ -32,6 +46,25 @@ export const initFavNotifications = () => {
         });
     }
 };
+
+async function enableBrowserNotifications() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'denied') {
+        showNotification('Powiadomienia są zablokowane w ustawieniach przeglądarki', 'warning');
+        return;
+    }
+
+    const permission = Notification.permission === 'granted'
+        ? 'granted'
+        : await Notification.requestPermission();
+    browserNotificationsEnabled = permission === 'granted';
+    localStorage.setItem(STORAGE_KEYS.BROWSER_NOTIFICATIONS, String(browserNotificationsEnabled));
+}
+
+function showBrowserNotification(title, body) {
+    if (!browserNotificationsEnabled || !('Notification' in window) || Notification.permission !== 'granted') return;
+    new Notification(title, { body, icon: 'https://fivem.net/favicon.png', tag: 'hex-fivem-favorite' });
+}
 
 /**
  * Update the toggle button appearance based on current state.
@@ -112,6 +145,7 @@ export const checkFavoritesStatus = (currentPlayers) => {
             const player = currentPlayers.find((p) => getPlayerKey(p) === key);
             const name = player ? player.name : key;
             showNotification(`🟢 ${name} jest teraz ONLINE`, 'success', 8000);
+            showBrowserNotification('Ulubiony gracz jest online', `${name} pojawił się na serwerze.`);
             playNotificationSound();
         }
     });
@@ -120,6 +154,7 @@ export const checkFavoritesStatus = (currentPlayers) => {
     previousOnlineKeys.forEach((key) => {
         if (!currentOnlineKeys.has(key)) {
             showNotification(`🔴 ${extractName(key)} wyszedł z serwera`, 'warning', 8000);
+            showBrowserNotification('Ulubiony gracz wyszedł', `${extractName(key)} opuścił serwer.`);
         }
     });
 

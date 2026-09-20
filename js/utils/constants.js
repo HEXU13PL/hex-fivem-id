@@ -23,6 +23,8 @@ export const STORAGE_KEYS = {
     FAVORITES: 'favorites',
     HISTORY: 'serverHistory',
     ACTIVE_TAB: 'activeTab',
+    FAV_NOTIFICATIONS: 'favNotificationsEnabled',
+    BROWSER_NOTIFICATIONS: 'browserNotificationsEnabled',
 };
 
 // Default refresh time in seconds

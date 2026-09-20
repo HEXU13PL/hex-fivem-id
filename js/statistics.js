@@ -1,8 +1,12 @@
 import { getPlayers } from './fetch.js';
+import { STORAGE_KEYS } from './utils/constants.js';
 
 let pingChartInstance = null;
 let platformChartInstance = null;
 let playerChartInstance = null;
+let activityChartInstance = null;
+const MAX_HISTORY_POINTS = 20;
+const HIGH_PING_THRESHOLD = 120;
 
 export const initStatistics = () => {
     // Nasłuchiwanie na zdarzenie zmiany zakładki lub kliknięcie w przycisk zakładki
@@ -51,6 +55,12 @@ export const updateCharts = () => {
     dashboard.style.display = 'block';
 
     updateKpiCards(players);
+    try {
+        updateActivityHistory(players);
+        renderHighPingList(players);
+    } catch (error) {
+        console.warn('Extended statistics unavailable:', error);
+    }
 
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js is not loaded yet');
@@ -78,6 +88,10 @@ const destroyCharts = () => {
         playerChartInstance.destroy();
         playerChartInstance = null;
     }
+    if (activityChartInstance) {
+        activityChartInstance.destroy();
+        activityChartInstance = null;
+    }
 };
 
 const updateKpiCards = (players) => {
@@ -93,6 +107,10 @@ const updateKpiCards = (players) => {
     const discordCountEl = document.getElementById('kpi-discord-count');
     const steamCoverageEl = document.getElementById('kpi-steam-coverage');
     const steamCountEl = document.getElementById('kpi-steam-count');
+    const occupancyEl = document.getElementById('kpi-occupancy');
+    const occupancyCountEl = document.getElementById('kpi-occupancy-count');
+    const highPingEl = document.getElementById('kpi-high-ping');
+    const highPingCountEl = document.getElementById('kpi-high-ping-count');
 
     if (avgPingEl) {
         avgPingEl.innerHTML = `${avgPing} <span class="unit">ms</span>`;
@@ -127,6 +145,94 @@ const updateKpiCards = (players) => {
     const steamPct = Math.round((steamCount / players.length) * 100);
     if (steamCoverageEl) steamCoverageEl.textContent = `${steamPct}%`;
     if (steamCountEl) steamCountEl.textContent = `${steamCount} / ${players.length} graczy`;
+
+    const statPlayers = document.getElementById('stat-players')?.textContent || '';
+    const maxClients = Number(statPlayers.split('/')[1]?.trim()) || 0;
+    const occupancy = maxClients > 0 ? Math.min(100, Math.round((players.length / maxClients) * 100)) : 0;
+    if (occupancyEl) occupancyEl.textContent = `${occupancy}%`;
+    if (occupancyCountEl) occupancyCountEl.textContent = `${players.length} / ${maxClients || '?'} slotów`;
+
+    const highPingCount = pings.filter((ping) => ping > HIGH_PING_THRESHOLD).length;
+    if (highPingEl) highPingEl.textContent = highPingCount;
+    if (highPingCountEl) highPingCountEl.textContent = `graczy powyżej ${HIGH_PING_THRESHOLD} ms`;
+};
+
+const getHistoryKey = () => {
+    const serverId = localStorage.getItem(STORAGE_KEYS.SERVER_ID) || document.getElementById('stat-id')?.textContent || 'unknown';
+    return `analyticsHistory:${serverId}`;
+};
+
+const readActivityHistory = () => {
+    try {
+        const stored = JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
+        return Array.isArray(stored) ? stored.slice(-MAX_HISTORY_POINTS) : [];
+    } catch {
+        return [];
+    }
+};
+
+const updateActivityHistory = (players) => {
+    const pings = players.map((player) => Number(player.ping) || 0);
+    const point = {
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        players: players.length,
+        ping: Math.round(pings.reduce((sum, value) => sum + value, 0) / players.length)
+    };
+    const history = readActivityHistory();
+    const lastPoint = history[history.length - 1];
+    if (!lastPoint || lastPoint.players !== point.players || lastPoint.ping !== point.ping) {
+        history.push(point);
+        try {
+            localStorage.setItem(getHistoryKey(), JSON.stringify(history.slice(-MAX_HISTORY_POINTS)));
+        } catch (error) {
+            console.warn('Could not save analytics history:', error);
+        }
+    }
+    renderActivityChart(readActivityHistory());
+};
+
+const renderHighPingList = (players) => {
+    const container = document.getElementById('high-ping-list');
+    if (!container) return;
+
+    const worstPlayers = [...players]
+        .sort((a, b) => (Number(b.ping) || 0) - (Number(a.ping) || 0))
+        .slice(0, 5);
+    container.innerHTML = worstPlayers.map((player, index) => {
+        const ping = Number(player.ping) || 0;
+        const level = ping > 200 ? 'critical' : ping > HIGH_PING_THRESHOLD ? 'warning' : 'normal';
+        return `<div class="high-ping-row"><span class="high-ping-rank">${index + 1}</span><span class="high-ping-name">${escapeHtml(player.name)}</span><span class="high-ping-id">ID ${escapeHtml(String(player.id))}</span><strong class="high-ping-value ${level}">${ping} ms</strong></div>`;
+    }).join('');
+};
+
+const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+
+const renderActivityChart = (history) => {
+    const ctx = document.getElementById('activity-chart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    if (activityChartInstance) activityChartInstance.destroy();
+
+    const baseOptions = getChartBaseOptions();
+    const accentColor = getThemeAccentColor();
+    activityChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: history.map((point) => point.time),
+            datasets: [
+                { label: 'Gracze online', data: history.map((point) => point.players), borderColor: accentColor, backgroundColor: hexToRgbaStr(accentColor, 0.16), fill: true, tension: 0.35, yAxisID: 'players' },
+                { label: 'Średni ping (ms)', data: history.map((point) => point.ping), borderColor: '#66c0f4', backgroundColor: 'transparent', tension: 0.35, yAxisID: 'ping' }
+            ]
+        },
+        options: {
+            ...baseOptions,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9a9ab0' } },
+                players: { beginAtZero: true, position: 'left', grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9a9ab0', precision: 0 } },
+                ping: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#66c0f4', precision: 0 } }
+            }
+        }
+    });
 };
 
 const getThemeAccentColor = () => {
