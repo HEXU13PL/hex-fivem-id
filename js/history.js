@@ -45,6 +45,11 @@ export const addToHistory = (serverId, serverName, serverIcon) => {
   renderHistoryMenu();
 };
 
+// Make it available globally for circular dependency resolution
+if (typeof window !== 'undefined') {
+  window.addToHistory = addToHistory;
+}
+
 const loadHistory = () => {
   const storedHistory = localStorage.getItem(STORAGE_KEYS.HISTORY);
   if (storedHistory) {

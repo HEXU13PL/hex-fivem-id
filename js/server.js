@@ -1,78 +1,126 @@
-import { getPlayers, renderPlayers } from './fetch.js';
-import { getPlayerKey } from './favorites.js';
-import { sendLog } from './logger.js';
+let lastMaxClients = 0;
 
-let search;
-let searching = false;
-let pendingSearch = null;
-let lastSearchQuery = '';
+const animateNumber = (element, target, formatter = (value) => String(value)) => {
+    if (!element) return;
+    const start = Number(element.dataset.numericValue ?? 0);
+    const end = Number(target) || 0;
+    element.dataset.numericValue = String(end);
+    if (start === end) {
+        element.textContent = formatter(end);
+        return;
+    }
 
-export const initializeSearch = () => {
-	search = document.querySelector('#search');
-	search.addEventListener('keyup', () => searchPlayers());
-	
-	const url = new URL(window.location.href);
-	if (url.searchParams.has('search')) {
-		const searchValue = url.searchParams.get('search');
-		search.value = searchValue;
-		pendingSearch = searchValue; 
-	}
+    const startedAt = performance.now();
+    const duration = 450;
+    const tick = (now) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        element.textContent = formatter(Math.round(start + (end - start) * eased));
+        if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
 };
 
-export const searchPlayers = () => {
-	const value = search.value;
-	updateSearchParam(value);
-
-	let players = getPlayers();
-	if (!players) {
-		return;
-	}
-
-	if (value.length < 1) {
-		searching = false;
-		lastSearchQuery = '';
-		return renderPlayers(players, true);
-	}
-
-	searching = true;
-
-	if (value.length >= 2 && value !== lastSearchQuery) {
-		lastSearchQuery = value;
-		sendLog('PLAYER_SEARCH', { query: value });
-	}
-
-	const query = value.trim().toLowerCase();
-	const queryBare = query.replace(/^(discord:|dcid:|dc:)/, '');
-
-	players = players.filter((player) => {
-		const playerId = player.id.toString();
-		const discordId = player.socials?.discord ? String(player.socials.discord).toLowerCase() : '';
-
-		return (
-			playerId.startsWith(value.trim()) ||
-			player.name.toLowerCase().includes(query) ||
-			getPlayerKey(player).toLowerCase().includes(query) ||
-			(discordId && (discordId.startsWith(query) || discordId.startsWith(queryBare)))
-		);
-	});
-	renderPlayers(players, true);
+export const setTitle = (title) => {
+    const statStatus = document.querySelector('#stat-status');
+    if (statStatus) {
+        if (title.includes('Loading')) {
+            statStatus.textContent = 'Connecting...';
+        } else if (title.includes('Error')) {
+            setServerStatus('Offline', false);
+        }
+    }
 };
 
-export const checkPendingSearch = () => {
-	if (pendingSearch) {
-		searchPlayers();
-		pendingSearch = null;
-	}
+export const setServerStatus = (status, isOnline = true) => {
+    const statStatus = document.querySelector('#stat-status');
+    const badge = document.querySelector('.badge-live');
+    if (statStatus) {
+        statStatus.textContent = status;
+    }
+    if (badge) {
+        if (isOnline) {
+            badge.innerHTML = '<span class="status-dot-online"></span> ONLINE';
+            badge.style.color = 'var(--online-color)';
+            badge.style.background = 'rgba(0, 230, 118, 0.1)';
+        } else {
+            badge.innerHTML = '<span style="width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #ef4444; margin-right: 8px;"></span> OFFLINE';
+            badge.style.color = '#ef4444';
+            badge.style.background = 'rgba(239, 68, 68, 0.1)';
+        }
+    }
 };
 
-const updateSearchParam = (searchValue) => {
-	const url = new URL(window.location.href);
-	if (searchValue.length > 0) {
-		url.searchParams.set('search', searchValue);
-	} else {
-		url.searchParams.delete('search');
-	}
-	window.history.replaceState(null, null, url);
+export const setServerInfo = (serverId, data) => {
+    if (!data) return;
+
+    // 1. Current Server ID
+    const statId = document.querySelector('#stat-id');
+    if (statId) {
+        statId.textContent = serverId;
+    }
+
+    // 2. Server Status Badge
+    setServerStatus('Online', true);
+
+    // 3. Clean Hostname / Server Name
+    const serverNameEl = document.querySelector('#server-name');
+    let cleanName = 'FiveM Server';
+    if (data.hostname) {
+        // Usuwamy kody kolorów FiveM (^0, ^1, ... ^9)
+        cleanName = data.hostname.replace(/\^[0-9]/g, '').trim();
+    }
+    if (serverNameEl && cleanName) {
+        serverNameEl.textContent = cleanName;
+        serverNameEl.title = cleanName;
+    }
+
+    // 4. Server Icon
+    const serverIconEl = document.querySelector('#server-icon');
+    let iconSrc = 'https://fivem.net/favicon.png';
+    if (serverIconEl) {
+        if (data.icon) {
+            iconSrc = data.icon.startsWith('data:') ? data.icon : `data:image/png;base64,${data.icon}`;
+            serverIconEl.src = iconSrc;
+            serverIconEl.style.display = 'block';
+        } else {
+            serverIconEl.src = iconSrc;
+            serverIconEl.style.display = 'block';
+        }
+    }
+
+    // 5. Active Players / Max Clients
+    const statPlayers = document.querySelector('#stat-players');
+    const clients = data.clients ?? (Array.isArray(data.players) ? data.players.length : 0);
+    const maxClients = data.sv_maxclients ?? data.vars?.sv_maxclients ?? data.svMaxclients ?? 0;
+    lastMaxClients = maxClients;
+
+    if (statPlayers) {
+        animateNumber(statPlayers, clients, (value) => `${value} / ${maxClients}`);
+    }
+
+    const serverVersion = data.vars?.version ?? data.version ?? data.serverVersion ?? 'Brak danych';
+    const oneSyncValue = data.vars?.onesync ?? data.vars?.onesync_enabled ?? data.onesync;
+    const oneSync = oneSyncValue === true || ['on', 'enabled', 'true', '1'].includes(String(oneSyncValue).toLowerCase())
+        ? 'ON'
+        : oneSyncValue === false || ['off', 'disabled', 'false', '0'].includes(String(oneSyncValue).toLowerCase())
+            ? 'OFF'
+            : oneSyncValue || 'Brak danych';
+
+    const versionEl = document.querySelector('#kpi-server-version');
+    const oneSyncEl = document.querySelector('#kpi-onesync');
+    if (versionEl) versionEl.textContent = String(serverVersion);
+    if (oneSyncEl) oneSyncEl.textContent = String(oneSync);
+
+    // 6. Update History with real server name and icon (lazy import to avoid circular dependency)
+    if (typeof window.addToHistory === 'function') {
+        window.addToHistory(serverId, cleanName, iconSrc);
+    }
 };
 
-export const isSearching = () => searching;
+export const updatePlayerCount = (currentCount) => {
+    const statPlayers = document.querySelector('#stat-players');
+    if (statPlayers) {
+        animateNumber(statPlayers, currentCount, (value) => `${value} / ${lastMaxClients || '?'}`);
+    }
+};
