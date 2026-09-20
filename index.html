@@ -414,6 +414,46 @@
             align-items: center;
         }
 
+        .high-ping-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .high-ping-row {
+            display: grid;
+            grid-template-columns: 28px minmax(0, 1fr) auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.025);
+        }
+        .high-ping-rank {
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+        }
+        .high-ping-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 700;
+        }
+        .high-ping-id {
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+        .high-ping-value {
+            min-width: 74px;
+            text-align: right;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .high-ping-value.normal { color: var(--online-color); }
+        .high-ping-value.warning { color: #f1c40f; }
+        .high-ping-value.critical { color: #ff1e27; }
+
         /* Player Details Modal Styles */
         .modal-overlay {
             position: fixed;
@@ -832,6 +872,12 @@
                 grid-template-columns: 1fr;
             }
 
+            .high-ping-row {
+                grid-template-columns: 24px minmax(0, 1fr) auto;
+                gap: 8px;
+            }
+            .high-ping-id { display: none; }
+
             /* Modal */
             .modal-container { padding: 14px; }
             .modal-avatar { width: 40px; height: 40px; }
@@ -990,6 +1036,16 @@
                         <div class="value" id="kpi-steam-coverage" style="color: #66c0f4;">0%</div>
                         <div class="stat-sub" id="kpi-steam-count">0 / 0 graczy</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="label">Zajętość Serwera</div>
+                        <div class="value" id="kpi-occupancy">0%</div>
+                        <div class="stat-sub" id="kpi-occupancy-count">0 / 0 slotów</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Wysoki Ping</div>
+                        <div class="value" id="kpi-high-ping">0</div>
+                        <div class="stat-sub" id="kpi-high-ping-count">graczy powyżej 120 ms</div>
+                    </div>
                 </div>
 
                 <!-- Charts grid -->
@@ -1022,6 +1078,22 @@
                         <div class="chart-body">
                             <canvas id="player-chart"></canvas>
                         </div>
+                    </div>
+                    <div class="chart-card chart-card-full">
+                        <div class="chart-header">
+                            <div class="chart-title">📈 Aktywność Serwera</div>
+                            <span class="chart-badge">Ostatnie 20 odświeżeń</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="activity-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card chart-card-full">
+                        <div class="chart-header">
+                            <div class="chart-title">🚨 Najwyższy Ping</div>
+                            <span class="chart-badge">Top 5</span>
+                        </div>
+                        <div id="high-ping-list" class="high-ping-list"></div>
                     </div>
                 </div>
             </div>
@@ -1079,7 +1151,7 @@
     <div id="loader" style="display: none;"><div class="spinner"></div></div>
     <div id="notification-container"></div>
 
-    <script type="module" src="js/index.js?v=103"></script>
+    <script type="module" src="js/index.js?v=104"></script>
 
     <script>
         // Animacja tytułu karty w przeglądarce

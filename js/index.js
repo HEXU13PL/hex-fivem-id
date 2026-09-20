@@ -8,10 +8,38 @@ import { showNotification } from './notifications.js';
 import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
 import { initPlayerModal } from './playerModal.js';
+import { initFavNotifications } from './favNotifications.js';
 
 let countdownInterval = null;
 const REFRESH_RATE = 30;
 let timeLeft = REFRESH_RATE;
+
+function initMobileMenu() {
+    const toggle = document.querySelector('#menu-toggle');
+    const menu = document.querySelector('.header-actions');
+    if (!toggle || !menu) return;
+
+    const closeMenu = () => {
+        menu.classList.remove('mobile-menu-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open menu');
+    };
+
+    toggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = menu.classList.toggle('mobile-menu-open');
+        toggle.setAttribute('aria-expanded', String(isOpen));
+        toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!menu.contains(event.target) && event.target !== toggle) closeMenu();
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 700) closeMenu();
+    });
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     initializeSearch();
@@ -20,9 +48,9 @@ window.addEventListener('DOMContentLoaded', () => {
     initHistory();
     initStatistics();
     initTabs();
-    initMobileMenu();
     initAutoRefresh();
     initPlayerModal();
+    initFavNotifications();
 
     const serverIdSearch = document.querySelector('#server-id');
     if (serverIdSearch) {
@@ -44,35 +72,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 console.info('Fetching by input.');
             }
         });
-
-        function initMobileMenu() {
-            const toggle = document.querySelector('#menu-toggle');
-            const menu = document.querySelector('.header-actions');
-            if (!toggle || !menu) return;
-
-            const closeMenu = () => {
-                menu.classList.remove('mobile-menu-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                toggle.setAttribute('aria-label', 'Open menu');
-            };
-
-            toggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                const isOpen = menu.classList.toggle('mobile-menu-open');
-                toggle.setAttribute('aria-expanded', String(isOpen));
-                toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-            });
-
-            document.addEventListener('click', (event) => {
-                if (!menu.contains(event.target) && event.target !== toggle) {
-                    closeMenu();
-                }
-            });
-
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 700) closeMenu();
-            });
-        }
     }
 
     const serverBtn = document.querySelector('#server-id-button');
