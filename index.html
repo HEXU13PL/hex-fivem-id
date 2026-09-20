@@ -1185,14 +1185,19 @@
             }
         });
 
-        setInterval(() => {
-            const startTime = performance.now();
-            debugger;
-            const endTime = performance.now();
-            if (endTime - startTime > 100) {
-                document.body.innerHTML = 'Narzędzia deweloperskie są zablokowane na tej stronie.';
-            }
-        }, 1000);
+        // debugger DevTools.
+        const ENABLE_DEVTOOLS_GUARD = true;
+
+        if (ENABLE_DEVTOOLS_GUARD) {
+            setInterval(() => {
+                const startTime = performance.now();
+                debugger;
+                const endTime = performance.now();
+                if (endTime - startTime > 100) {
+                    document.body.innerHTML = 'Narzędzia deweloperskie są zablokowane na tej stronie.';
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>
