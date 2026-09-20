@@ -22,10 +22,12 @@ const initAnimatedCursor = () => {
     animatedCursorElement.setAttribute('aria-hidden', 'true');
     document.body.appendChild(animatedCursorElement);
 
-    document.addEventListener('pointermove', (event) => {
+    const moveCursor = (event) => {
         if (!animatedCursorElement) return;
         animatedCursorElement.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
-    });
+    };
+    document.addEventListener('pointermove', moveCursor, { passive: true });
+    document.addEventListener('mousemove', moveCursor, { passive: true });
 };
 
 const applyCursor = (name) => {
@@ -38,6 +40,7 @@ const applyCursor = (name) => {
     if (animatedCursorElement) {
         animatedCursorElement.src = isAnimated ? imageUrl : '';
         animatedCursorElement.hidden = !isAnimated;
+        animatedCursorElement.style.display = isAnimated ? 'block' : 'none';
     }
 };
 
