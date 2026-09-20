@@ -314,8 +314,14 @@
         th { 
             background-color: var(--bg-card); color: var(--text-secondary); 
             font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
-            padding: 18px 22px; border-bottom: 1px solid var(--border-color); 
+            padding: 18px 22px; border-bottom: 1px solid var(--border-color); white-space: nowrap;
         }
+        th.table-no { width: 60px; }
+        th.table-favorite { width: 50px; }
+        th.table-id { width: 60px; }
+        th.table-name { min-width: 150px; }
+        th.table-socials { min-width: 200px; }
+        th.table-ping { width: 80px; text-align: right; }
         td { padding: 16px 22px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
         
         tr:not(#table-header):not(#favorites-table-header):not(.table-footer) {
@@ -326,13 +332,14 @@
             box-shadow: inset 4px 0 0 var(--accent-red);
         }
 
-        .table-no { width: 60px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
-        .table-favorite { width: 50px; text-align: center; cursor: pointer; }
+        .table-no { width: 60px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+        .table-favorite { width: 50px; text-align: center; cursor: pointer; white-space: nowrap; }
         .table-favorite img { width: 18px; height: 18px; transition: transform 0.2s ease; }
         .table-favorite:hover img { transform: scale(1.25); }
-        .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; }
+        .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; width: 60px; white-space: nowrap; }
+        .table-name { min-width: 150px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; }
+        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; min-width: 200px; }
         .id-badge {
             display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
             border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
@@ -536,6 +543,8 @@
             font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
             white-space: nowrap;
+            width: 80px;
+            text-align: right;
         }
         .table-ping.good { color: var(--online-color); }
         .table-ping.medium { color: #66c0f4; }
