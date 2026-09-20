@@ -120,19 +120,33 @@
             display: flex;
             align-items: center;
             height: 42px;
-            padding: 0 10px;
-            border-radius: var(--radius);
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            padding: 0 4px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+        .cursor-picker-wrapper:hover {
+            background: rgba(255, 255, 255, 0.045);
+            border-color: var(--border-color);
         }
         #cursor-style {
+            appearance: none;
             background: transparent;
             border: 0;
             outline: 0;
-            color: var(--text-primary);
-            font: 600 0.78rem 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-secondary);
+            font: 700 0.78rem 'Plus Jakarta Sans', sans-serif;
             cursor: pointer;
+            padding: 8px 18px 8px 4px;
+            background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%), linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+            background-position: calc(100% - 9px) 50%, calc(100% - 4px) 50%;
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            transition: color 0.2s ease;
         }
+        #cursor-style:hover { color: var(--text-primary); }
+        #cursor-style:focus-visible { box-shadow: 0 0 0 2px var(--accent-red-glow); border-radius: 5px; }
         #cursor-style option { background: var(--bg-card); color: var(--text-primary); }
 
         body[data-cursor="neon"] *,
