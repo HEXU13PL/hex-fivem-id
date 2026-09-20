@@ -151,6 +151,19 @@
 
         body[data-cursor="cross"] *,
         body[data-cursor="helloKitty"] * { cursor: var(--custom-cursor); }
+        .animated-custom-cursor {
+            position: fixed;
+            top: -16px;
+            left: -16px;
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 10000;
+            user-select: none;
+            will-change: transform;
+        }
+        .animated-custom-cursor[hidden] { display: none; }
 
         #accent-color-picker {
             -webkit-appearance: none;

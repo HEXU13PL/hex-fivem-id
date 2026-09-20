@@ -12,10 +12,33 @@ const getAccentColor = () => getComputedStyle(document.documentElement).getPrope
 
 const getImageUrl = (name) => name === 'cross' ? CROSS_CURSOR_IMAGE : HELLO_KITTY_CURSOR_IMAGE;
 
+let animatedCursorElement = null;
+
+const initAnimatedCursor = () => {
+    if (animatedCursorElement) return;
+    animatedCursorElement = document.createElement('img');
+    animatedCursorElement.className = 'animated-custom-cursor';
+    animatedCursorElement.alt = '';
+    animatedCursorElement.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(animatedCursorElement);
+
+    document.addEventListener('pointermove', (event) => {
+        if (!animatedCursorElement) return;
+        animatedCursorElement.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+    });
+};
+
 const applyCursor = (name) => {
     const cursor = cursorOptions[name];
-    document.documentElement.style.setProperty('--custom-cursor', cursor ? cursor(getAccentColor(), getImageUrl(name)) : 'auto');
+    const imageUrl = getImageUrl(name);
+    const isAnimated = Boolean(cursor && imageUrl);
+    document.documentElement.style.setProperty('--custom-cursor', isAnimated ? 'none' : cursor ? cursor(getAccentColor(), '') : 'auto');
     document.body.dataset.cursor = name;
+
+    if (animatedCursorElement) {
+        animatedCursorElement.src = isAnimated ? imageUrl : '';
+        animatedCursorElement.hidden = !isAnimated;
+    }
 };
 
 export const initCursor = () => {
@@ -24,6 +47,7 @@ export const initCursor = () => {
 
     const savedCursor = localStorage.getItem(CURSOR_STORAGE_KEY) || 'default';
     select.value = cursorOptions[savedCursor] ? savedCursor : 'default';
+    initAnimatedCursor();
     applyCursor(select.value);
 
     select.addEventListener('change', () => {
