@@ -8,6 +8,27 @@ let activityChartInstance = null;
 const MAX_HISTORY_POINTS = 20;
 const HIGH_PING_THRESHOLD = 120;
 
+const animateNumber = (element, target, formatter = (value) => String(value)) => {
+    if (!element) return;
+    const start = Number(element.dataset.numericValue ?? 0);
+    const end = Number(target) || 0;
+    element.dataset.numericValue = String(end);
+    if (start === end) {
+        element.innerHTML = formatter(end);
+        return;
+    }
+
+    const startedAt = performance.now();
+    const duration = 450;
+    const tick = (now) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        element.innerHTML = formatter(Math.round(start + (end - start) * eased));
+        if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+};
+
 export const initStatistics = () => {
     // Nasłuchiwanie na zdarzenie zmiany zakładki lub kliknięcie w przycisk zakładki
     window.addEventListener('tabChanged', (e) => {
@@ -115,9 +136,7 @@ const updateKpiCards = (players) => {
     const highPingEl = document.getElementById('kpi-high-ping');
     const highPingCountEl = document.getElementById('kpi-high-ping-count');
 
-    if (avgPingEl) {
-        avgPingEl.innerHTML = `${avgPing} <span class="unit">ms</span>`;
-    }
+    if (avgPingEl) animateNumber(avgPingEl, avgPing, (value) => `${value} <span class="unit">ms</span>`);
 
     if (pingQualityEl) {
         if (avgPing <= 45) {
@@ -135,31 +154,29 @@ const updateKpiCards = (players) => {
         }
     }
 
-    if (pingRangeEl) {
-        pingRangeEl.innerHTML = `${minPing} - ${maxPing} <span class="unit">ms</span>`;
-    }
+    if (pingRangeEl) pingRangeEl.innerHTML = `${minPing} - ${maxPing} <span class="unit">ms</span>`;
 
     const discordCount = players.filter(p => p.socials && p.socials.discord).length;
     const discordPct = Math.round((discordCount / players.length) * 100);
-    if (discordCoverageEl) discordCoverageEl.textContent = `${discordPct}%`;
+    if (discordCoverageEl) animateNumber(discordCoverageEl, discordPct, (value) => `${value}%`);
     if (discordCountEl) discordCountEl.textContent = `${discordCount} / ${players.length} graczy`;
     if (discordProgressEl) discordProgressEl.style.width = `${discordPct}%`;
 
     const steamCount = players.filter(p => p.socials && p.socials.steam).length;
     const steamPct = Math.round((steamCount / players.length) * 100);
-    if (steamCoverageEl) steamCoverageEl.textContent = `${steamPct}%`;
+    if (steamCoverageEl) animateNumber(steamCoverageEl, steamPct, (value) => `${value}%`);
     if (steamCountEl) steamCountEl.textContent = `${steamCount} / ${players.length} graczy`;
     if (steamProgressEl) steamProgressEl.style.width = `${steamPct}%`;
 
     const statPlayers = document.getElementById('stat-players')?.textContent || '';
     const maxClients = Number(statPlayers.split('/')[1]?.trim()) || 0;
     const occupancy = maxClients > 0 ? Math.min(100, Math.round((players.length / maxClients) * 100)) : 0;
-    if (occupancyEl) occupancyEl.textContent = `${occupancy}%`;
+    if (occupancyEl) animateNumber(occupancyEl, occupancy, (value) => `${value}%`);
     if (occupancyCountEl) occupancyCountEl.textContent = `${players.length} / ${maxClients || '?'} slotów`;
     if (occupancyProgressEl) occupancyProgressEl.style.width = `${occupancy}%`;
 
     const highPingCount = pings.filter((ping) => ping > HIGH_PING_THRESHOLD).length;
-    if (highPingEl) highPingEl.textContent = highPingCount;
+    if (highPingEl) animateNumber(highPingEl, highPingCount);
     if (highPingCountEl) highPingCountEl.textContent = `graczy powyżej ${HIGH_PING_THRESHOLD} ms`;
 };
 

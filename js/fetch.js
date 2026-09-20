@@ -454,6 +454,27 @@ const showLoader = (isVisible) => {
     if (loader) {
         loader.style.display = isVisible ? 'flex' : 'none';
     }
+    if (isVisible && !currentPlayers) renderTableSkeleton();
+    if (!isVisible && table?.querySelector('.skeleton-row')) {
+        renderPlayers(currentPlayers || []);
+    }
+};
+
+const renderTableSkeleton = () => {
+    if (!table || table.querySelector('.skeleton-row')) return;
+    resetTable();
+    for (let index = 0; index < 5; index++) {
+        const row = document.createElement('tr');
+        row.className = 'skeleton-row';
+        row.innerHTML = `
+            <td><span class="skeleton-line short"></span></td>
+            <td><span class="skeleton-line short"></span></td>
+            <td><span class="skeleton-line short"></span></td>
+            <td><span class="skeleton-line medium"></span></td>
+            <td><span class="skeleton-line"></span></td>
+            <td><span class="skeleton-line short"></span></td>`;
+        table.appendChild(row);
+    }
 };
 
 const showNotification = (message, type) => {

@@ -2,6 +2,27 @@ import { addToHistory } from './history.js';
 
 let lastMaxClients = 0;
 
+const animateNumber = (element, target, formatter = (value) => String(value)) => {
+    if (!element) return;
+    const start = Number(element.dataset.numericValue ?? 0);
+    const end = Number(target) || 0;
+    element.dataset.numericValue = String(end);
+    if (start === end) {
+        element.textContent = formatter(end);
+        return;
+    }
+
+    const startedAt = performance.now();
+    const duration = 450;
+    const tick = (now) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        element.textContent = formatter(Math.round(start + (end - start) * eased));
+        if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+};
+
 export const setTitle = (title) => {
     const statStatus = document.querySelector('#stat-status');
     if (statStatus) {
@@ -77,7 +98,7 @@ export const setServerInfo = (serverId, data) => {
     lastMaxClients = maxClients;
 
     if (statPlayers) {
-        statPlayers.textContent = `${clients} / ${maxClients}`;
+        animateNumber(statPlayers, clients, (value) => `${value} / ${maxClients}`);
     }
 
     const serverVersion = data.vars?.version ?? data.version ?? data.serverVersion ?? 'Brak danych';
@@ -102,6 +123,6 @@ export const setServerInfo = (serverId, data) => {
 export const updatePlayerCount = (currentCount) => {
     const statPlayers = document.querySelector('#stat-players');
     if (statPlayers) {
-        statPlayers.textContent = `${currentCount} / ${lastMaxClients || '?'}`;
+        animateNumber(statPlayers, currentCount, (value) => `${value} / ${lastMaxClients || '?'}`);
     }
 };

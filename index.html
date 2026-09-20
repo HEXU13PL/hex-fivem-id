@@ -539,6 +539,17 @@
             position: relative;
             transform: scale(0.94);
             transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-x: hidden;
+        }
+        .modal-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+            box-shadow: 0 0 18px var(--accent-red-glow);
         }
         .modal-overlay.active .modal-container {
             transform: scale(1);
@@ -575,6 +586,11 @@
             margin-bottom: 20px;
             padding-bottom: 18px;
             border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--accent-red-glow), transparent 55%);
+            margin-left: -28px;
+            margin-right: -28px;
+            padding-left: 28px;
+            padding-right: 64px;
         }
         .modal-avatar {
             width: 64px;
@@ -583,7 +599,11 @@
             object-fit: cover;
             border: 2px solid var(--border-color);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            outline: 3px solid var(--accent-red-glow);
+            outline-offset: 3px;
+            transition: transform 0.25s ease, outline-color 0.25s ease;
         }
+        .modal-avatar:hover { transform: scale(1.05) rotate(2deg); outline-color: var(--accent-red); }
         .modal-user-info {
             flex: 1;
             min-width: 0;
@@ -645,7 +665,11 @@
             letter-spacing: 0.8px;
             color: var(--text-secondary);
             margin: 18px 0 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        .modal-section-title::before { content: ''; width: 4px; height: 16px; border-radius: 3px; background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red-glow); }
 
         .modal-identifiers-list {
             display: flex;
@@ -665,6 +689,7 @@
             padding: 10px 14px;
             border-radius: 8px;
             transition: var(--transition);
+            animation: fadeInUp 0.25s ease both;
         }
         .modal-id-row:hover {
             border-color: rgba(255, 255, 255, 0.18);
@@ -764,6 +789,23 @@
             border-color: #f1c40f;
             color: #f1c40f;
             background: rgba(241, 196, 15, 0.1);
+        }
+
+        .skeleton-row td { padding: 16px 22px; }
+        .skeleton-line {
+            display: block;
+            height: 14px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.2s ease-in-out infinite;
+        }
+        .skeleton-line.short { width: 42%; }
+        .skeleton-line.medium { width: 68%; }
+        @keyframes skeletonShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
 
         /* ========== RESPONSIVE: Tablet & Mobile ========== */
@@ -873,6 +915,12 @@
                 padding: 18px;
                 margin: 5vh auto;
             }
+            .modal-header {
+                margin-left: -18px;
+                margin-right: -18px;
+                padding-left: 18px;
+                padding-right: 52px;
+            }
             .modal-header { gap: 12px; }
             .modal-avatar { width: 48px; height: 48px; }
             .modal-actions-grid {
@@ -929,6 +977,12 @@
 
             /* Modal */
             .modal-container { padding: 14px; }
+            .modal-header {
+                margin-left: -14px;
+                margin-right: -14px;
+                padding-left: 14px;
+                padding-right: 44px;
+            }
             .modal-avatar { width: 40px; height: 40px; }
             .modal-close-btn { top: 10px; right: 10px; width: 28px; height: 28px; font-size: 1rem; }
 
