@@ -6,6 +6,7 @@ import { getDiscordId, getSteamId } from './utils/user.js';
 import { sendLog } from './logger.js';
 import { updateCharts } from './statistics.js';
 import { openPlayerModal } from './playerModal.js';
+import { checkFavoritesStatus } from './favNotifications.js';
 
 const refreshButton = document.querySelector('#refresh-button');
 const loader = document.querySelector('#loader');
@@ -143,6 +144,7 @@ const fetchPlayers = (url, playersFetch = false) => {
                 currentPlayers = players;
                 renderPlayers(players);
                 updateActivePlayers(players);
+                checkFavoritesStatus(players);
                 checkPendingSearch();
                 updateCharts();
             } else {
@@ -306,13 +308,13 @@ export const renderPlayers = (players, search = false) => {
         const pingVal = Number(player.ping) || 0;
         ping.textContent = `${pingVal}ms`;
         if (pingVal < 50) {
-            ping.style.color = '#00e676';
+            ping.classList.add('good');
         } else if (pingVal < 100) {
-            ping.style.color = '#66c0f4';
+            ping.classList.add('medium');
         } else if (pingVal < 150) {
-            ping.style.color = '#f1c40f';
+            ping.classList.add('warning');
         } else {
-            ping.style.color = '#ff1e27';
+            ping.classList.add('critical');
         }
         ping.style.fontFamily = "'JetBrains Mono', monospace";
         ping.style.fontWeight = '700';

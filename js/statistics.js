@@ -107,6 +107,9 @@ const updateKpiCards = (players) => {
     const discordCountEl = document.getElementById('kpi-discord-count');
     const steamCoverageEl = document.getElementById('kpi-steam-coverage');
     const steamCountEl = document.getElementById('kpi-steam-count');
+    const discordProgressEl = document.getElementById('kpi-discord-progress');
+    const steamProgressEl = document.getElementById('kpi-steam-progress');
+    const occupancyProgressEl = document.getElementById('kpi-occupancy-progress');
     const occupancyEl = document.getElementById('kpi-occupancy');
     const occupancyCountEl = document.getElementById('kpi-occupancy-count');
     const highPingEl = document.getElementById('kpi-high-ping');
@@ -140,17 +143,20 @@ const updateKpiCards = (players) => {
     const discordPct = Math.round((discordCount / players.length) * 100);
     if (discordCoverageEl) discordCoverageEl.textContent = `${discordPct}%`;
     if (discordCountEl) discordCountEl.textContent = `${discordCount} / ${players.length} graczy`;
+    if (discordProgressEl) discordProgressEl.style.width = `${discordPct}%`;
 
     const steamCount = players.filter(p => p.socials && p.socials.steam).length;
     const steamPct = Math.round((steamCount / players.length) * 100);
     if (steamCoverageEl) steamCoverageEl.textContent = `${steamPct}%`;
     if (steamCountEl) steamCountEl.textContent = `${steamCount} / ${players.length} graczy`;
+    if (steamProgressEl) steamProgressEl.style.width = `${steamPct}%`;
 
     const statPlayers = document.getElementById('stat-players')?.textContent || '';
     const maxClients = Number(statPlayers.split('/')[1]?.trim()) || 0;
     const occupancy = maxClients > 0 ? Math.min(100, Math.round((players.length / maxClients) * 100)) : 0;
     if (occupancyEl) occupancyEl.textContent = `${occupancy}%`;
     if (occupancyCountEl) occupancyCountEl.textContent = `${players.length} / ${maxClients || '?'} slotów`;
+    if (occupancyProgressEl) occupancyProgressEl.style.width = `${occupancy}%`;
 
     const highPingCount = pings.filter((ping) => ping > HIGH_PING_THRESHOLD).length;
     if (highPingEl) highPingEl.textContent = highPingCount;

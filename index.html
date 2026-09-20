@@ -163,13 +163,22 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px var(--accent-red-glow);
         }
-        .stat-card .label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        .kpi-icon { color: var(--accent-red); font-size: 1rem; filter: drop-shadow(0 0 6px var(--accent-red-glow)); }
         .stat-card .value { font-size: 1.8rem; font-weight: 800; margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
         .stat-card .badge-live {
             position: absolute; top: 18px; right: 18px;
             background: rgba(0, 230, 118, 0.1); color: var(--online-color);
             padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
             display: flex; align-items: center; gap: 6px;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+            opacity: 0.35;
         }
 
         .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 16px; flex-wrap: wrap; }
@@ -220,12 +229,31 @@
             background: transparent; border: none; border-bottom: 3px solid transparent; 
             padding: 14px 22px; color: var(--text-secondary); cursor: pointer; font-weight: 700; font-size: 0.95rem;
             transition: var(--transition);
+            position: relative;
         }
         .tab-button:hover { color: var(--text-primary); }
-        .tab-button.active { border-bottom-color: var(--accent-red); color: #fff; text-shadow: 0 0 10px var(--accent-red-glow); }
+        .tab-button.active { border-bottom-color: var(--accent-red); color: #fff; text-shadow: 0 0 10px var(--accent-red-glow); background: linear-gradient(180deg, transparent, var(--accent-red-glow)); }
+        .tab-button.active::after { content: ''; position: absolute; left: 22%; right: 22%; bottom: -3px; height: 3px; background: var(--accent-red); box-shadow: 0 0 12px var(--accent-red); }
+        .tab-icon { color: var(--accent-red); margin-right: 6px; font-size: 1rem; }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeInUp 0.3s ease; }
+
+        .progress-track {
+            height: 5px;
+            margin-top: 12px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+        .progress-value {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-red-hover));
+            box-shadow: 0 0 10px var(--accent-red-glow);
+            transition: width 0.5s ease;
+        }
 
         .table-container { 
             margin-top: 16px; background-color: var(--bg-secondary); 
@@ -453,6 +481,27 @@
         .high-ping-value.normal { color: var(--online-color); }
         .high-ping-value.warning { color: #f1c40f; }
         .high-ping-value.critical { color: #ff1e27; }
+
+        .table-ping {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .table-ping.good { color: var(--online-color); }
+        .table-ping.medium { color: #66c0f4; }
+        .table-ping.warning { color: #f1c40f; }
+        .table-ping.critical { color: #ff1e27; }
+
+        @keyframes kpiReveal {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .analytics-kpi-grid .stat-card { animation: kpiReveal 0.45s ease both; }
+        .analytics-kpi-grid .stat-card:nth-child(2) { animation-delay: 0.04s; }
+        .analytics-kpi-grid .stat-card:nth-child(3) { animation-delay: 0.08s; }
+        .analytics-kpi-grid .stat-card:nth-child(4) { animation-delay: 0.12s; }
+        .analytics-kpi-grid .stat-card:nth-child(5) { animation-delay: 0.16s; }
+        .analytics-kpi-grid .stat-card:nth-child(6) { animation-delay: 0.20s; }
 
         /* Player Details Modal Styles */
         .modal-overlay {
@@ -963,9 +1012,9 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-button active" data-tab="players">Players List</button>
-            <button class="tab-button" data-tab="favorites">Favorite Players</button>
-            <button class="tab-button" data-tab="statistics">Statistics</button>
+            <button class="tab-button active" data-tab="players"><span class="tab-icon">☷</span>Players List</button>
+            <button class="tab-button" data-tab="favorites"><span class="tab-icon">★</span>Favorite Players</button>
+            <button class="tab-button" data-tab="statistics"><span class="tab-icon">▥</span>Statistics</button>
         </div>
 
         <div id="players-tab" class="tab-content active">
@@ -1017,42 +1066,45 @@
                 <!-- KPI summary cards -->
                 <div class="analytics-kpi-grid">
                     <div class="stat-card">
-                        <div class="label">Średni Ping</div>
+                        <div class="label"><span class="kpi-icon">◌</span> Średni Ping</div>
                         <div class="value" id="kpi-avg-ping">0 <span class="unit">ms</span></div>
                         <div class="stat-sub" id="kpi-ping-quality">Stabilny</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Zakres Pingu</div>
+                        <div class="label"><span class="kpi-icon">↔</span> Zakres Pingu</div>
                         <div class="value" id="kpi-ping-range">0 - 0 <span class="unit">ms</span></div>
                         <div class="stat-sub">Min / Max opóźnienie</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Pokrycie Discord</div>
+                        <div class="label"><span class="kpi-icon">◉</span> Pokrycie Discord</div>
                         <div class="value" id="kpi-discord-coverage" style="color: #8ea1ff;">0%</div>
                         <div class="stat-sub" id="kpi-discord-count">0 / 0 graczy</div>
+                        <div class="progress-track"><div id="kpi-discord-progress" class="progress-value"></div></div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Pokrycie Steam</div>
+                        <div class="label"><span class="kpi-icon">◈</span> Pokrycie Steam</div>
                         <div class="value" id="kpi-steam-coverage" style="color: #66c0f4;">0%</div>
                         <div class="stat-sub" id="kpi-steam-count">0 / 0 graczy</div>
+                        <div class="progress-track"><div id="kpi-steam-progress" class="progress-value"></div></div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Zajętość Serwera</div>
+                        <div class="label"><span class="kpi-icon">▦</span> Zajętość Serwera</div>
                         <div class="value" id="kpi-occupancy">0%</div>
                         <div class="stat-sub" id="kpi-occupancy-count">0 / 0 slotów</div>
+                        <div class="progress-track"><div id="kpi-occupancy-progress" class="progress-value"></div></div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Wysoki Ping</div>
+                        <div class="label"><span class="kpi-icon">!</span> Wysoki Ping</div>
                         <div class="value" id="kpi-high-ping">0</div>
                         <div class="stat-sub" id="kpi-high-ping-count">graczy powyżej 120 ms</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Wersja Serwera</div>
+                        <div class="label"><span class="kpi-icon">#</span> Wersja Serwera</div>
                         <div class="value" id="kpi-server-version">---</div>
                         <div class="stat-sub">Wersja FiveM</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">OneSync</div>
+                        <div class="label"><span class="kpi-icon">⌁</span> OneSync</div>
                         <div class="value" id="kpi-onesync">---</div>
                         <div class="stat-sub">Synchronizacja sieciowa</div>
                     </div>
@@ -1195,7 +1247,7 @@
             }
         });
 
-        // debugger DevTools.
+        // Zmień na true, aby ponownie włączyć blokadę DevTools.
         const ENABLE_DEVTOOLS_GUARD = true;
 
         if (ENABLE_DEVTOOLS_GUARD) {
