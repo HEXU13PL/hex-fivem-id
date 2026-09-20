@@ -1046,6 +1046,16 @@
                         <div class="value" id="kpi-high-ping">0</div>
                         <div class="stat-sub" id="kpi-high-ping-count">graczy powyżej 120 ms</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="label">Wersja Serwera</div>
+                        <div class="value" id="kpi-server-version">---</div>
+                        <div class="stat-sub">Wersja FiveM</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">OneSync</div>
+                        <div class="value" id="kpi-onesync">---</div>
+                        <div class="stat-sub">Synchronizacja sieciowa</div>
+                    </div>
                 </div>
 
                 <!-- Charts grid -->
@@ -1185,7 +1195,7 @@
             }
         });
 
-        // debugger DevTools.
+        // Zmień na true, aby ponownie włączyć blokadę DevTools.
         const ENABLE_DEVTOOLS_GUARD = true;
 
         if (ENABLE_DEVTOOLS_GUARD) {

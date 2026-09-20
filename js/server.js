@@ -80,6 +80,19 @@ export const setServerInfo = (serverId, data) => {
         statPlayers.textContent = `${clients} / ${maxClients}`;
     }
 
+    const serverVersion = data.vars?.version ?? data.version ?? data.serverVersion ?? 'Brak danych';
+    const oneSyncValue = data.vars?.onesync ?? data.vars?.onesync_enabled ?? data.onesync;
+    const oneSync = oneSyncValue === true || ['on', 'enabled', 'true', '1'].includes(String(oneSyncValue).toLowerCase())
+        ? 'ON'
+        : oneSyncValue === false || ['off', 'disabled', 'false', '0'].includes(String(oneSyncValue).toLowerCase())
+            ? 'OFF'
+            : oneSyncValue || 'Brak danych';
+
+    const versionEl = document.querySelector('#kpi-server-version');
+    const oneSyncEl = document.querySelector('#kpi-onesync');
+    if (versionEl) versionEl.textContent = String(serverVersion);
+    if (oneSyncEl) oneSyncEl.textContent = String(oneSync);
+
     // 6. Update History with real server name and icon
     if (typeof addToHistory === 'function') {
         addToHistory(serverId, cleanName, iconSrc);
