@@ -20,6 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initHistory();
     initStatistics();
     initTabs();
+    initMobileMenu();
     initAutoRefresh();
     initPlayerModal();
 
@@ -43,6 +44,35 @@ window.addEventListener('DOMContentLoaded', () => {
                 console.info('Fetching by input.');
             }
         });
+
+        function initMobileMenu() {
+            const toggle = document.querySelector('#menu-toggle');
+            const menu = document.querySelector('.header-actions');
+            if (!toggle || !menu) return;
+
+            const closeMenu = () => {
+                menu.classList.remove('mobile-menu-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'Open menu');
+            };
+
+            toggle.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const isOpen = menu.classList.toggle('mobile-menu-open');
+                toggle.setAttribute('aria-expanded', String(isOpen));
+                toggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!menu.contains(event.target) && event.target !== toggle) {
+                    closeMenu();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 700) closeMenu();
+            });
+        }
     }
 
     const serverBtn = document.querySelector('#server-id-button');

@@ -1,11 +1,12 @@
 import { STORAGE_KEYS } from './utils/constants.js';
 import { fetchServer, getPlayers } from './fetch.js';
-import { showNotification } from './notifications.js';
+import { showNotification, notifyFavoriteStatus, requestNotificationPermission } from './notifications.js';
 import { sendLog } from './logger.js';
 import { openPlayerModal } from './playerModal.js';
 
 let favorites = [];
 let activePlayerKeys = new Set();
+let hasReceivedPlayerStatus = false;
 
 export const getPlayerKey = (player) => {
 	if (player.socials && player.socials.steam) return `steam:${player.socials.steam}`;
@@ -117,6 +118,7 @@ export const togglePlayerFavorite = (playerKey, playerName, imgElement) => {
 			name: playerName,
 			key: playerKey
 		});
+		requestNotificationPermission();
 	}
 
 	saveFavorites();
@@ -133,7 +135,22 @@ export const isServerFavorite = (serverId) => {
 };
 
 export const updateActivePlayers = (players) => {
-	activePlayerKeys = new Set(players.map((p) => getPlayerKey(p)));
+	const nextActivePlayerKeys = new Set(players.map((p) => getPlayerKey(p)));
+
+	if (hasReceivedPlayerStatus) {
+		favorites
+			.filter((favorite) => favorite.type === 'player')
+			.forEach((favorite) => {
+				const wasOnline = activePlayerKeys.has(favorite.key);
+				const isOnline = nextActivePlayerKeys.has(favorite.key);
+				if (wasOnline !== isOnline) {
+					notifyFavoriteStatus(favorite.name, isOnline);
+				}
+			});
+	}
+
+	activePlayerKeys = nextActivePlayerKeys;
+	hasReceivedPlayerStatus = true;
 	renderFavoritePlayers();
 };
 

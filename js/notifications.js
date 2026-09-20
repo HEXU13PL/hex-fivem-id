@@ -64,5 +64,67 @@ export const removeNotification = (id) => {
   }
 };
 
+let notificationAudioContext;
+
+const getNotificationAudioContext = () => {
+  if (!notificationAudioContext) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return null;
+    notificationAudioContext = new AudioContext();
+  }
+  return notificationAudioContext;
+};
+
+const playStatusSound = () => {
+  try {
+    const audioContext = getNotificationAudioContext();
+    if (!audioContext) return;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 660;
+    gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.08, audioContext.currentTime + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.18);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch (error) {
+    console.warn('Unable to play favorite status sound:', error);
+  }
+};
+
+export const requestNotificationPermission = () => {
+  const audioContext = getNotificationAudioContext();
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume().catch((error) => {
+      console.warn('Unable to resume favorite status sound:', error);
+    });
+  }
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().catch((error) => {
+      console.warn('Unable to request notification permission:', error);
+    });
+  }
+};
+
+export const notifyFavoriteStatus = (playerName, isOnline) => {
+  const message = isOnline
+    ? `Ulubiony gracz "${playerName}" wszedł na serwer`
+    : `Ulubiony gracz "${playerName}" wyszedł z serwera`;
+  const type = isOnline ? 'success' : 'info';
+
+  showNotification(message, type, 7000);
+  playStatusSound();
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Status ulubionego gracza', {
+      body: message,
+      tag: `favorite-player-${playerName}`,
+    });
+  }
+};
+
 window.createNotification = showNotification;
 window.removeNotification = removeNotification;

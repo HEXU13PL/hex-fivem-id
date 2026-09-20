@@ -676,6 +676,179 @@
             color: #f1c40f;
             background: rgba(241, 196, 15, 0.1);
         }
+
+        /* ========== RESPONSIVE: Tablet & Mobile ========== */
+        @media (max-width: 768px) {
+            /* Header */
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+            h1 { font-size: 1.2rem; }
+            #server-icon { width: 28px; height: 28px; }
+
+            /* Layout spacing */
+            main, header, .tabs, .tab-content, .stats-grid {
+                padding: 0 14px;
+            }
+
+            /* Stats grid */
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 16px;
+            }
+            .stat-card { padding: 14px 16px; }
+            .stat-card .value { font-size: 1.5rem; }
+            .stat-card:hover { transform: none; }
+
+            /* Controls bar */
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                margin-top: 18px;
+            }
+            .input-group {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .input-group input[type="text"],
+            .input-group input[type="search"] {
+                flex: 1;
+                min-width: 0;
+            }
+            #server-id-button, #refresh-button {
+                flex-shrink: 0;
+            }
+
+            /* Tabs */
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                gap: 4px;
+                margin-top: 20px;
+                scrollbar-width: none;
+            }
+            .tabs::-webkit-scrollbar { display: none; }
+            .tab-button {
+                padding: 10px 14px;
+                font-size: 0.82rem;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            /* Table */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-top: 12px;
+            }
+            table { min-width: 600px; }
+            th { padding: 12px 10px; font-size: 0.72rem; }
+            td { padding: 12px 10px; font-size: 0.85rem; }
+            .table-no { width: 40px; }
+            .table-socials { min-height: 36px; }
+
+            /* Dropdown menus */
+            .dropdown-menu {
+                position: fixed;
+                left: 12px;
+                right: 12px;
+                top: auto;
+                width: auto;
+                max-height: 60vh;
+                overflow-y: auto;
+            }
+
+            /* Notifications */
+            #notification-container {
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+            }
+            .notification { min-width: unset; width: 100%; }
+
+            /* Modal */
+            .modal-container {
+                width: 95vw;
+                max-width: 95vw;
+                max-height: 90vh;
+                padding: 18px;
+                margin: 5vh auto;
+            }
+            .modal-header { gap: 12px; }
+            .modal-avatar { width: 48px; height: 48px; }
+            .modal-actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Charts */
+            .analytics-charts-grid { grid-template-columns: 1fr; }
+            .analytics-kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            /* Disable hover transforms on touch */
+            .chart-card:hover,
+            .stat-card:hover {
+                transform: none;
+            }
+            tr:not(#table-header):not(#favorites-table-header):not(.table-footer):hover {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Even smaller header */
+            h1 { font-size: 1rem; }
+            h1::before { width: 4px; height: 20px; }
+
+            /* Smaller stat values */
+            .stat-card .value { font-size: 1.3rem; }
+            .stat-card .label { font-size: 0.72rem; }
+            .stat-card { padding: 12px 14px; }
+
+            /* Controls */
+            .controls-bar { gap: 8px; }
+            button, .btn { padding: 10px 14px; font-size: 0.82rem; }
+            input[type="text"], input[type="search"] { padding: 10px 14px; font-size: 0.85rem; }
+
+            /* Table – hide # column */
+            .table-no { display: none; }
+            th { padding: 10px 8px; font-size: 0.68rem; }
+            td { padding: 10px 8px; font-size: 0.8rem; }
+
+            /* KPI grid single column */
+            .analytics-kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Modal */
+            .modal-container { padding: 14px; }
+            .modal-avatar { width: 40px; height: 40px; }
+            .modal-close-btn { top: 10px; right: 10px; width: 28px; height: 28px; font-size: 1rem; }
+
+            /* Notifications full-width */
+            #notification-container {
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+            }
+
+            /* Header actions */
+            .header-actions { gap: 6px; }
+            .icon-button { padding: 8px; }
+            .color-picker-wrapper { width: 36px; height: 36px; }
+        }
     </style>
 </head>
 <body>
@@ -732,6 +905,10 @@
                     Auto-Refresh: <span id="auto-refresh-status" style="color: var(--online-color);">ON</span>
                 </button>
                 <span id="refresh-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted);">30s</span>
+                <button id="fav-notif-toggle" class="btn active" style="display: flex; align-items: center; gap: 8px;" title="Powiadomienia o ulubionych graczach">
+                    <span class="fav-notif-icon">🔔</span>
+                    Fav Alert: <span class="fav-notif-label" style="color: var(--online-color);">ON</span>
+                </button>
             </div>
 
             <div class="input-group">
