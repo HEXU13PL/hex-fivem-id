@@ -116,6 +116,35 @@
             transform: translateY(-2px);
         }
 
+        .cursor-picker-wrapper {
+            display: flex;
+            align-items: center;
+            height: 42px;
+            padding: 0 10px;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+        #cursor-style {
+            background: transparent;
+            border: 0;
+            outline: 0;
+            color: var(--text-primary);
+            font: 600 0.78rem 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+        }
+        #cursor-style option { background: var(--bg-card); color: var(--text-primary); }
+
+        body[data-cursor="neon"] *,
+        body[data-cursor="crosshair"] *,
+        body[data-cursor="dot"] * { cursor: var(--custom-cursor); }
+        body[data-cursor="neon"] button,
+        body[data-cursor="neon"] a,
+        body[data-cursor="crosshair"] button,
+        body[data-cursor="crosshair"] a,
+        body[data-cursor="dot"] button,
+        body[data-cursor="dot"] a { cursor: pointer; }
+
         #accent-color-picker {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -1021,8 +1050,17 @@
             <div class="color-picker-wrapper" title="Zmień kolor akcentu">
                 <input type="color" id="accent-color-picker" value="#e50914">
             </div>
+            <label class="cursor-picker-wrapper" title="Wybierz kursor" for="cursor-style">
+                <span aria-hidden="true">⌁</span>
+                <select id="cursor-style" aria-label="Wybierz kursor">
+                    <option value="default">Zwykły</option>
+                    <option value="cross">Cross</option>
+                    <option value="helloKitty">Hello Kitty</option>
+                </select>
+            </label>
         </div>
     </header>
+
 
     <main>
         <div class="stats-grid">

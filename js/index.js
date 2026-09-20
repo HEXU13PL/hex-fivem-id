@@ -9,6 +9,7 @@ import { STORAGE_KEYS } from './utils/constants.js';
 import { initTabs } from './tabs.js';
 import { initPlayerModal } from './playerModal.js';
 import { initFavNotifications } from './favNotifications.js';
+import { initCursor } from './cursor.js';
 
 let countdownInterval = null;
 const REFRESH_RATE = 30;
@@ -51,6 +52,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initAutoRefresh();
     initPlayerModal();
     initFavNotifications();
+    initCursor();
 
     const serverIdSearch = document.querySelector('#server-id');
     if (serverIdSearch) {
