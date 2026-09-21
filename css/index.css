@@ -395,12 +395,19 @@ th {
 
 .table-name {
 	width: 40%;
+	min-width: 0;
 	font-weight: 500;
+	overflow: hidden;
 	word-break: break-all;
+}
+
+.discord-user-badge {
+	box-sizing: border-box;
 }
 
 .table-socials {
 	width: 13%;
+	min-width: 0;
 	display: flex;
 	gap: 12px;
 	align-items: center;
