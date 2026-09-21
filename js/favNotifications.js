@@ -1,6 +1,7 @@
 import { STORAGE_KEYS } from './utils/constants.js';
 import { isPlayerFavorite, getPlayerKey } from './favorites.js';
 import { showNotification } from './notifications.js';
+import { notifyFavoriteOnline } from './auth.js';
 
 let previousOnlineKeys = null; // null = first run, skip notifications
 let notificationsEnabled = true;
@@ -146,6 +147,7 @@ export const checkFavoritesStatus = (currentPlayers) => {
             const name = player ? player.name : key;
             showNotification(`🟢 ${name} jest teraz ONLINE`, 'success', 8000);
             showBrowserNotification('Ulubiony gracz jest online', `${name} pojawił się na serwerze.`);
+            notifyFavoriteOnline(name, localStorage.getItem(STORAGE_KEYS.SERVER_ID));
             playNotificationSound();
         }
     });
