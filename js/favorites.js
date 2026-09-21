@@ -273,6 +273,10 @@ export const renderFavoritePlayers = () => {
 	let index = 1;
 	playerFavorites.forEach((player) => {
 		const isOnline = activePlayerKeys.has(player.key);
+		const allPlayers = (typeof getPlayers === 'function' ? getPlayers() : []) || [];
+		const matchedPlayer = allPlayers.find((currentPlayer) => getPlayerKey(currentPlayer) === player.key);
+		const discordId = matchedPlayer?.socials?.discord
+			|| (player.key.startsWith('discord:') ? player.key.replace('discord:', '') : null);
 		const tr = document.createElement('tr');
 		if (isOnline) {
 			tr.classList.add('player-online');
@@ -324,8 +328,7 @@ export const renderFavoritePlayers = () => {
 		id.textContent = player.key;
 		name.textContent = player.name;
 
-		if (player.key.startsWith('discord:')) {
-			const discordId = player.key.replace('discord:', '');
+		if (discordId) {
 			const mentionFormat = `<@${discordId}>`;
 			const discordContainer = document.createElement('span');
 			discordContainer.className = 'discord-user-badge';
@@ -369,8 +372,7 @@ export const renderFavoritePlayers = () => {
 		ping.appendChild(statusImg);
 		ping.appendChild(ping_text);
 
-		if (player.key.startsWith('discord:')) {
-			const discordId = player.key.replace('discord:', '');
+		if (discordId) {
 			const lookupBtn = document.createElement('button');
 			lookupBtn.type = 'button';
 			lookupBtn.className = 'dl-lookup-btn';
@@ -440,4 +442,3 @@ export const renderFavoritePlayers = () => {
 		}
 	}
 };
-// dfd

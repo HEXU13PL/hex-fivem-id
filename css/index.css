@@ -332,7 +332,7 @@ table {
 
 tr {
 	display: grid;
-	grid-template-columns: 10% 12% 12% 29% 24% 13%;
+	grid-template-columns: 10fr 12fr 12fr 29fr 24fr 13fr;
 	align-items: center;
 	padding: 16px 24px;
 	border-bottom: 1px solid var(--border-color);
