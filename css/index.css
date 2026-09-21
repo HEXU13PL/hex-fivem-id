@@ -338,6 +338,12 @@ tr {
 	transition: background-color 0.2s ease;
 }
 
+tr > th,
+tr > td {
+	min-width: 0;
+	box-sizing: border-box;
+}
+
 tr#table-header, tr#favorites-table-header {
 	font-weight: 600;
 	color: var(--text-secondary);
@@ -394,7 +400,7 @@ th {
 }
 
 .table-name {
-	width: 40%;
+	width: 29%;
 	min-width: 0;
 	font-weight: 500;
 	overflow: hidden;
@@ -406,11 +412,12 @@ th {
 }
 
 .table-socials {
-	width: 13%;
+	width: 24%;
 	min-width: 0;
 	display: flex;
 	gap: 12px;
 	align-items: center;
+	overflow: hidden;
 }
 
 .table-socials a {

@@ -3,6 +3,7 @@ import { fetchServer, getPlayers } from './fetch.js';
 import { showNotification, notifyFavoriteStatus, requestNotificationPermission } from './notifications.js';
 import { sendLog } from './logger.js';
 import { openPlayerModal } from './playerModal.js';
+import { lookupDiscordUser, getDefaultDiscordAvatar } from './utils/discord.js';
 
 let favorites = [];
 let activePlayerKeys = new Set();
@@ -322,6 +323,43 @@ export const renderFavoritePlayers = () => {
 		star.appendChild(starImg);
 		id.textContent = player.key;
 		name.textContent = player.name;
+
+		if (player.key.startsWith('discord:')) {
+			const discordId = player.key.replace('discord:', '');
+			const mentionFormat = `<@${discordId}>`;
+			const discordContainer = document.createElement('span');
+			discordContainer.className = 'discord-user-badge';
+			discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
+			discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; max-width: calc(100% - 10px); margin-left: 10px; font-size: 0.86em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; overflow: hidden; white-space: nowrap; transition: background 0.2s;';
+
+			const avatarImg = document.createElement('img');
+			avatarImg.src = getDefaultDiscordAvatar(discordId);
+			avatarImg.alt = 'Discord';
+			avatarImg.style.cssText = 'width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; object-fit: cover;';
+
+			const nickSpan = document.createElement('span');
+			nickSpan.style.cssText = 'min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+			nickSpan.textContent = discordId;
+			discordContainer.appendChild(avatarImg);
+			discordContainer.appendChild(nickSpan);
+			discordContainer.onmouseover = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.3)'; };
+			discordContainer.onmouseout = () => { discordContainer.style.background = 'rgba(88, 101, 242, 0.15)'; };
+			discordContainer.onclick = (e) => {
+				e.stopPropagation();
+				navigator.clipboard.writeText(mentionFormat).then(() => {
+					showNotification(`Skopiowano: ${mentionFormat}`, 'success');
+				});
+			};
+			name.appendChild(discordContainer);
+
+			lookupDiscordUser(discordId).then((user) => {
+				if (!user || !discordContainer.isConnected) return;
+				avatarImg.src = user.avatarUrl;
+				nickSpan.textContent = user.displayName;
+				discordContainer.title = `Discord: ${user.displayName}${user.username ? ` (@${user.username})` : ''} — kliknij, aby skopiować ${mentionFormat}`;
+			});
+		}
+
 		const ping_text = document.createElement('span');
 		ping_text.textContent = isOnline ? 'Online' : 'Offline';
 		const statusImg = document.createElement('img');
