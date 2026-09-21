@@ -2,7 +2,7 @@ const CURSOR_STORAGE_KEY = 'customCursor';
 const CROSS_CURSOR_IMAGE = 'https://cdn.nest.rip/uploads/04d2f2f5-1338-4321-815b-10c857650485.gif';
 const HELLO_KITTY_CURSOR_IMAGE = 'https://cdn.nest.rip/uploads/92e1a4d9-32d6-4534-881d-cd799d432681.gif';
 const STICH_CURSOR_IMAGE = 'https://cdn.nest.rip/uploads/32b12e10-0aea-4560-9080-9cc1c47250f9.gif';
-const JIGGLYPUFF_CURSOR_IMAGE = 'https://cdn.nest.rip/uploads/0e9bf0dd-22df-4d7b-b4f6-6895cab55b9f.gif';
+const JIGGLYPUFF_CURSOR_IMAGE = 'https://cdn.nest.rip/uploads/9da9bc90-fc76-48d5-84a1-d6d56af3557e.png';
 
 const cursorOptions = {
     default: null,
