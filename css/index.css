@@ -46,7 +46,7 @@
 	--text-secondary: #6b7280;
 	--border-color: rgba(0, 0, 0, 0.08);
 	
-	/* Shadosasadws & Blur */
+	/* Shadows & Blur */
 	--card-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
 	--glow-shadow: 0 0 12px rgba(0, 204, 109, 0.2);
 	--glass-blur: blur(16px);
@@ -331,7 +331,8 @@ table {
 }
 
 tr {
-	display: flex;
+	display: grid;
+	grid-template-columns: 10% 12% 12% 29% 24% 13%;
 	align-items: center;
 	padding: 16px 24px;
 	border-bottom: 1px solid var(--border-color);
@@ -366,13 +367,11 @@ th {
 }
 
 .table-no {
-	width: 10%;
 	color: var(--text-secondary);
 	font-weight: 500;
 }
 
 .table-favorite {
-	width: 12%;
 	display: flex;
 	align-items: center;
 }
@@ -394,13 +393,11 @@ th {
 }
 
 .table-id {
-	width: 12%;
 	font-weight: 600;
 	color: var(--accent-color);
 }
 
 .table-name {
-	width: 29%;
 	min-width: 0;
 	font-weight: 500;
 	overflow: hidden;
@@ -412,7 +409,6 @@ th {
 }
 
 .table-socials {
-	width: 24%;
 	min-width: 0;
 	display: flex;
 	gap: 12px;
@@ -436,7 +432,6 @@ th {
 }
 
 .table-ping {
-	width: 13%;
 	font-weight: 600;
 	display: flex;
 	align-items: center;
@@ -458,6 +453,7 @@ th {
 }
 
 .table-footer {
+	grid-column: 1 / -1;
 	display: flex;
 	justify-content: center;
 	padding: 24px;
