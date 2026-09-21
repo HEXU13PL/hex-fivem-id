@@ -41,12 +41,20 @@ export const searchPlayers = () => {
 		sendLog('PLAYER_SEARCH', { query: value });
 	}
 
-	players = players.filter(
-		(player) =>
-			player.id.toString().startsWith(value) ||
-			player.name.toLowerCase().includes(value.toLowerCase()) ||
-			getPlayerKey(player).toLowerCase().includes(value.toLowerCase())
-	);
+	const query = value.trim().toLowerCase();
+	const queryBare = query.replace(/^(discord:|dcid:|dc:)/, '');
+
+	players = players.filter((player) => {
+		const playerId = player.id.toString();
+		const discordId = player.socials?.discord ? String(player.socials.discord).toLowerCase() : '';
+
+		return (
+			playerId.startsWith(value.trim()) ||
+			player.name.toLowerCase().includes(query) ||
+			getPlayerKey(player).toLowerCase().includes(query) ||
+			(discordId && (discordId.startsWith(query) || discordId.startsWith(queryBare)))
+		);
+	});
 	renderPlayers(players, true);
 };
 
