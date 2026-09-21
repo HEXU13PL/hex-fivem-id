@@ -97,6 +97,80 @@ body > main {
 	width: 100%;
 }
 
+header,
+main,
+.tabs,
+.tab-content,
+.stats-grid,
+.controls-bar {
+	max-width: 1200px !important;
+	margin-left: auto !important;
+	margin-right: auto !important;
+	padding-left: 24px !important;
+	padding-right: 24px !important;
+	width: calc(100% - 48px) !important;
+}
+
+header {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	flex-wrap: wrap !important;
+	gap: 15px !important;
+	padding-top: 20px !important;
+	padding-bottom: 20px !important;
+}
+
+.header-title-container {
+	display: flex !important;
+	align-items: center !important;
+	gap: 14px !important;
+	flex: 1 1 auto !important;
+	min-width: 0 !important;
+}
+
+.header-actions {
+	display: flex !important;
+	align-items: center !important;
+	gap: 10px !important;
+	margin-left: auto !important;
+	justify-content: flex-end !important;
+}
+
+main {
+	padding-top: 0 !important;
+}
+
+.stats-grid {
+	display: grid !important;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+	gap: 16px !important;
+	margin-top: 24px !important;
+}
+
+.controls-bar {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	gap: 16px !important;
+	flex-wrap: wrap !important;
+	margin-top: 28px !important;
+}
+
+.input-group {
+	display: flex !important;
+	gap: 10px !important;
+	align-items: center !important;
+	flex-wrap: wrap !important;
+}
+
+.tabs {
+	display: flex !important;
+	gap: 12px !important;
+	margin-top: 32px !important;
+	border-bottom: 1px solid var(--border-color) !important;
+}
+
 #wrapper {
 	width: 90%;
 	max-width: 1200px;
@@ -115,14 +189,25 @@ body > main {
 }
 
 header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 24px 32px;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	padding: 24px 32px !important;
 	background: var(--header-bg);
 	border-bottom: 1px solid var(--border-color);
-	flex-wrap: wrap;
-	gap: 20px;
+	flex-wrap: wrap !important;
+	gap: 20px !important;
+}
+
+header .header-title-container,
+header .header-actions {
+	display: flex !important;
+	align-items: center !important;
+}
+
+header .header-actions {
+	margin-left: auto !important;
+	justify-content: flex-end !important;
 }
 
 #title {
