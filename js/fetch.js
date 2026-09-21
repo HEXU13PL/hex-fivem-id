@@ -239,7 +239,6 @@ export const renderPlayers = (players, search = false) => {
         star.className = 'table-favorite';
         id.className = 'table-id';
         name.className = 'table-name';
-        name.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow: hidden;';
         socials.className = 'table-socials';
         ping.className = 'table-ping';
 
@@ -253,11 +252,7 @@ export const renderPlayers = (players, search = false) => {
         star.appendChild(starImg);
 
         id.textContent = player.id;
-        
-        const nameText = document.createElement('span');
-        nameText.textContent = player.name;
-        nameText.style.cssText = 'flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
-        name.appendChild(nameText);
+        name.textContent = player.name;
 
         if (player.socials && player.socials.discord) {
             const discordId = player.socials.discord;
@@ -266,16 +261,15 @@ export const renderPlayers = (players, search = false) => {
             const discordContainer = document.createElement('span');
             discordContainer.className = 'discord-user-badge';
             discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
-            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; font-size: 0.85em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 3px 10px; border-radius: 10px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s; flex-shrink: 0;';
+            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 8px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s;';
 
             const avatarImg = document.createElement('img');
             avatarImg.src = getDefaultDiscordAvatar(discordId);
             avatarImg.alt = 'Discord';
-            avatarImg.style.cssText = 'width: 20px; height: 20px; border-radius: 50%; object-fit: cover; flex-shrink: 0;';
+            avatarImg.style.cssText = 'width: 16px; height: 16px; border-radius: 50%; object-fit: cover;';
 
             const nickSpan = document.createElement('span');
             nickSpan.textContent = discordId;
-            nickSpan.style.cssText = 'max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
 
             discordContainer.appendChild(avatarImg);
             discordContainer.appendChild(nickSpan);

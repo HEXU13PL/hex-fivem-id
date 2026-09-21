@@ -338,7 +338,23 @@
         .table-favorite:hover img { transform: scale(1.25); }
         .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; width: 60px; white-space: nowrap; }
         .table-name { min-width: 150px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .table-name span { display: inline-flex; align-items: center; vertical-align: middle; }
+        .discord-user-badge { 
+            display: inline-flex !important; 
+            align-items: center !important; 
+            gap: 4px !important; 
+            margin-left: 6px !important; 
+            font-size: 0.75em !important; 
+            color: #5865F2 !important; 
+            background: rgba(88, 101, 242, 0.15) !important; 
+            padding: 2px 6px !important; 
+            border-radius: 6px !important; 
+            vertical-align: middle !important; 
+            cursor: pointer !important; 
+            user-select: none !important; 
+            transition: background 0.2s !important;
+            white-space: nowrap !important;
+        }
+        .discord-user-badge img { width: 14px !important; height: 14px !important; }
 
         .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; min-width: 200px; }
         .id-badge {
