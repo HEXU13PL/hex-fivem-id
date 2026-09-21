@@ -326,7 +326,11 @@ export const renderFavoritePlayers = () => {
 		starImg.title = 'Remove from Favorites';
 		star.appendChild(starImg);
 		id.textContent = player.key;
-		name.textContent = player.name;
+
+		const playerNameText = document.createElement('span');
+		playerNameText.className = 'player-name-text';
+		playerNameText.textContent = player.name;
+		name.appendChild(playerNameText);
 
 		if (discordId) {
 			const mentionFormat = `<@${discordId}>`;

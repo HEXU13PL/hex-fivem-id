@@ -489,12 +489,26 @@ th {
 .table-name {
 	min-width: 0;
 	font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	overflow: hidden;
-	word-break: break-all;
+	white-space: nowrap;
+}
+
+.table-name .player-name-text {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .discord-user-badge {
 	box-sizing: border-box;
+	flex: 0 0 auto;
+	max-width: min(220px, 100%);
+	min-width: 0;
 }
 
 .table-socials {
