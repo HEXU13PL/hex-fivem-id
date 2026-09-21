@@ -20,7 +20,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/index.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     
@@ -80,7 +79,7 @@
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
         }
 
-        .header-title-container { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+        .header-title-container { display: flex; align-items: center; gap: 14px; }
         #server-icon { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; box-shadow: 0 0 12px rgba(0,0,0,0.5); }
         
         h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px; }
@@ -96,7 +95,7 @@
         }
         #server-name { animation: neonPulse 3s ease-in-out infinite; }
 
-        .header-actions { display: flex !important; align-items: center !important; gap: 10px !important; margin-left: auto !important; justify-content: flex-end !important; }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
 
         .color-picker-wrapper {
             width: 42px;
@@ -311,13 +310,14 @@
             border: 1px solid var(--border-color); border-radius: var(--radius); 
             overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        tr { border-bottom: 1px solid var(--border-color); }
         th { 
             background-color: var(--bg-card); color: var(--text-secondary); 
             font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
-            padding: 18px 22px; border-bottom: 1px solid var(--border-color); 
+            padding: 18px 22px; 
         }
-        td { padding: 16px 22px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; min-width: 0; }
+        td { padding: 16px 22px; border-bottom: 0; font-size: 0.95rem; }
         
         tr:not(#table-header):not(#favorites-table-header):not(.table-footer) {
             transition: var(--transition);
@@ -333,7 +333,7 @@
         .table-favorite:hover img { transform: scale(1.25); }
         .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; }
 
-        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; min-width: 0; overflow: hidden; }
+        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; }
         .id-badge {
             display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
             border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
