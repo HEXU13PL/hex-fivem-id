@@ -20,6 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     
@@ -310,13 +311,13 @@
             border: 1px solid var(--border-color); border-radius: var(--radius); 
             overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         th { 
             background-color: var(--bg-card); color: var(--text-secondary); 
             font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
             padding: 18px 22px; border-bottom: 1px solid var(--border-color); 
         }
-        td { padding: 16px 22px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        td { padding: 16px 22px; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; min-width: 0; }
         
         tr:not(#table-header):not(#favorites-table-header):not(.table-footer) {
             transition: var(--transition);
@@ -332,7 +333,7 @@
         .table-favorite:hover img { transform: scale(1.25); }
         .table-id { font-family: 'JetBrains Mono', monospace; color: var(--accent-red-hover); font-weight: 600; }
 
-        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; }
+        .table-socials { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-height: 42px; min-width: 0; overflow: hidden; }
         .id-badge {
             display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
             border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'JetBrains Mono', monospace;
