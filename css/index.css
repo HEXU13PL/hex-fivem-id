@@ -85,12 +85,16 @@ body {
 	background: var(--bg-gradient);
 	background-attachment: fixed;
 	min-height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: flex-start;
+	display: block;
 	color: var(--text-color);
 	font-family: 'Plus Jakarta Sans', sans-serif;
 	transition: background 0.3s, color 0.3s;
+}
+
+body > header,
+body > main {
+	display: block;
+	width: 100%;
 }
 
 #wrapper {
