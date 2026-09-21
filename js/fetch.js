@@ -261,12 +261,12 @@ export const renderPlayers = (players, search = false) => {
             const discordContainer = document.createElement('span');
             discordContainer.className = 'discord-user-badge';
             discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
-            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 8px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s;';
+            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 0.8em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s;';
 
             const avatarImg = document.createElement('img');
             avatarImg.src = getDefaultDiscordAvatar(discordId);
             avatarImg.alt = 'Discord';
-            avatarImg.style.cssText = 'width: 16px; height: 16px; border-radius: 50%; object-fit: cover;';
+            avatarImg.style.cssText = 'width: 18px; height: 18px; border-radius: 50%; object-fit: cover;';
 
             const nickSpan = document.createElement('span');
             nickSpan.textContent = discordId;
