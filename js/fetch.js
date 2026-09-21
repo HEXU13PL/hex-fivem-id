@@ -261,15 +261,15 @@ export const renderPlayers = (players, search = false) => {
             const discordContainer = document.createElement('span');
             discordContainer.className = 'discord-user-badge';
             discordContainer.title = `Kliknij, aby skopiować ${mentionFormat}`;
-            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; max-width: calc(100% - 10px); margin-left: 10px; font-size: 0.86em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 2px 8px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; overflow: hidden; white-space: nowrap; transition: background 0.2s;';
+            discordContainer.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; max-width: calc(100% - 10px); margin-left: 10px; font-size: 0.95em; color: #5865F2; background: rgba(88, 101, 242, 0.15); padding: 4px 10px; border-radius: 12px; vertical-align: middle; cursor: pointer; user-select: none; overflow: hidden; white-space: nowrap; transition: background 0.2s;';
 
             const avatarImg = document.createElement('img');
             avatarImg.src = getDefaultDiscordAvatar(discordId);
             avatarImg.alt = 'Discord';
-            avatarImg.style.cssText = 'width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; object-fit: cover;';
+            avatarImg.style.cssText = 'width: 26px; height: 26px; flex: 0 0 26px; border-radius: 50%; object-fit: cover;';
 
             const nickSpan = document.createElement('span');
-            nickSpan.style.cssText = 'min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+            nickSpan.style.cssText = 'min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; font-size: 1em;';
             nickSpan.textContent = discordId;
 
             discordContainer.appendChild(avatarImg);
