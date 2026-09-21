@@ -297,9 +297,14 @@ export const renderPlayers = (players, search = false) => {
 
             lookupDiscordUser(discordId).then((user) => {
                 if (!user || !discordContainer.isConnected) return;
+                const resolvedDisplayName = user.displayName || user.username || discordId;
+                if (resolvedDisplayName.trim().toLowerCase() === (player.name || '').trim().toLowerCase()) {
+                    discordContainer.style.display = 'none';
+                    return;
+                }
                 avatarImg.src = user.avatarUrl;
-                nickSpan.textContent = user.displayName;
-                discordContainer.title = `Discord: ${user.displayName}${user.username ? ` (@${user.username})` : ''} — kliknij, aby skopiować ${mentionFormat}`;
+                nickSpan.textContent = resolvedDisplayName;
+                discordContainer.title = `Discord: ${resolvedDisplayName}${user.username ? ` (@${user.username})` : ''} — kliknij, aby skopiować ${mentionFormat}`;
             });
         }
 
