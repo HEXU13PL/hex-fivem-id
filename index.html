@@ -97,28 +97,6 @@
 
         .header-actions { display: flex; align-items: center; gap: 10px; }
 
-        .account-widget { position: relative; }
-        .account-button { display: flex; align-items: center; gap: 9px; padding: 7px 10px; }
-        .account-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-        .account-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .account-badge { color: #ffd166; font-size: 0.68rem; font-weight: 800; letter-spacing: .04em; }
-        .account-menu { right: 0; min-width: 260px; padding: 14px; }
-        .account-menu[hidden] { display: none; }
-        .account-menu-header { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
-        .account-menu-header img { width: 42px; height: 42px; border-radius: 50%; }
-        .account-menu-name { font-weight: 800; }
-        .account-menu-status { color: var(--text-secondary); font-size: .78rem; margin-top: 3px; }
-        .account-menu .btn { width: 100%; margin-top: 8px; text-align: left; }
-        .pro-panel-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.7); }
-        .pro-panel-overlay[hidden] { display: none; }
-        .pro-panel { width: min(520px, 100%); max-height: 90vh; overflow: auto; background: var(--bg-card); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 24px; box-shadow: 0 20px 80px rgba(0,0,0,.5); }
-        .pro-panel h2 { margin: 0 0 8px; }
-        .pro-panel p { color: var(--text-secondary); line-height: 1.5; }
-        .pro-panel label { display: block; color: var(--text-secondary); font-size: .8rem; font-weight: 700; margin: 18px 0 7px; }
-        .pro-panel input { width: 100%; }
-        .pro-panel-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .pro-lock { text-align: center; padding: 12px; color: var(--text-secondary); }
-
         .color-picker-wrapper {
             width: 42px;
             height: 42px;
@@ -1101,22 +1079,6 @@
                     <option value="helloKitty">Hello Kitty</option>
                 </select>
             </label>
-            <div class="account-widget">
-                <button id="account-button" class="btn account-button" type="button" aria-expanded="false">
-                    <span id="account-button-label">Zaloguj przez Discord</span>
-                </button>
-                <div id="account-menu" class="dropdown-menu account-menu" hidden>
-                    <div class="account-menu-header">
-                        <img id="account-menu-avatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
-                        <div>
-                            <div id="account-menu-name" class="account-menu-name"></div>
-                            <div id="account-menu-status" class="account-menu-status"></div>
-                        </div>
-                    </div>
-                    <button id="pro-panel-button" class="btn" type="button">Panel Pro</button>
-                    <button id="logout-button" class="btn" type="button">Wyloguj</button>
-                </div>
-            </div>
         </div>
     </header>
 
@@ -1361,26 +1323,10 @@
         </div>
     </div>
 
-    <div id="pro-panel-overlay" class="pro-panel-overlay" hidden>
-        <section class="pro-panel" role="dialog" aria-modal="true" aria-labelledby="pro-panel-title">
-            <h2 id="pro-panel-title">Panel Pro</h2>
-            <p>Podaj webhook Discorda. Gdy ulubiony gracz pojawi się na serwerze, backend wyśle tam powiadomienie.</p>
-            <div id="pro-panel-lock" class="pro-lock" hidden>Twoje konto nie ma jeszcze dostępu Pro.</div>
-            <div id="pro-panel-form">
-                <label for="pro-webhook-url">URL webhooka Discord</label>
-                <input id="pro-webhook-url" type="url" placeholder="https://discord.com/api/webhooks/..." autocomplete="off">
-                <div class="pro-panel-actions">
-                    <button id="pro-panel-close" class="btn" type="button">Anuluj</button>
-                    <button id="pro-webhook-save" class="btn-primary" type="button">Zapisz webhook</button>
-                </div>
-            </div>
-        </section>
-    </div>
-
     <div id="loader" style="display: none;"><div class="spinner"></div></div>
     <div id="notification-container"></div>
 
-    <script type="module" src="js/index.js?v=106"></script>
+    <script type="module" src="js/index.js?v=105"></script>
 
     <script>
         // Animacja tytułu karty w przeglądarce

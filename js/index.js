@@ -10,7 +10,6 @@ import { initTabs } from './tabs.js';
 import { initPlayerModal } from './playerModal.js';
 import { initFavNotifications } from './favNotifications.js';
 import { initCursor } from './cursor.js';
-import { initAuth } from './auth.js';
 
 let countdownInterval = null;
 const REFRESH_RATE = 30;
@@ -54,7 +53,6 @@ window.addEventListener('DOMContentLoaded', () => {
     initPlayerModal();
     initFavNotifications();
     initCursor();
-    initAuth();
 
     const serverIdSearch = document.querySelector('#server-id');
     if (serverIdSearch) {
