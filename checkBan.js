@@ -56,7 +56,7 @@ function showBlockedPage(sessionId, reason) {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Strona zablokowana</title>
+            <title>Strona tymczasowo zablokowana</title>
             <style>
                 * { box-sizing: border-box; }
                 body {
@@ -135,7 +135,7 @@ try {
     if (isBanned || isNotAllowedDuringLockdown) {
         showBlockedPage(
             sessionId,
-            isBanned ? 'Dostęp do strony został zablokowany.' : 'Dostęp do strony jest obecnie ograniczony.'
+            isBanned ? 'Dostęp do strony został tymczasowo zablokowany.' : 'Dostęp do strony jest obecnie ograniczony.'
         );
     }
 } catch (error) {
