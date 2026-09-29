@@ -109,7 +109,7 @@ function showBlockedPage(sessionId, reason) {
         </head>
         <body>
             <main>
-                <h1>Strona zablokowana</h1>
+                <h1>Strona tymczasowo zablokowana</h1>
                 <p>${reason}</p>
                 <span class="session-label">Twoje ID sesji</span>
                 <code id="session-id"></code>
